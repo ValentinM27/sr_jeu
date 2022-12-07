@@ -10,6 +10,8 @@
 // Paramètres du serveur
 #define server_PORT 8080
 #define server_IP "127.0.0.1"
+#define nb_client_max 2
+#define ask_player "C'est votre tour !"
 
 /**
  * @brief Serveur
@@ -20,7 +22,11 @@ int main(void)
 {
 	// Descripteur du serveur
 	int serverSocket, inputStream;
+	int nb_client_connected = 0;
 	struct sockaddr_in serverAddr;
+
+	// Structure de stockage des clients
+	int clients_connected[nb_client_max];
 
 	// Gestion des connexions multiples
 	socklen_t addr_size;
@@ -34,7 +40,7 @@ int main(void)
 	// Création du scoket
 	serverSocket = socket(AF_INET, SOCK_STREAM, 0);
 	if(serverSocket < 0) {
-		printf("[NOK] - Erreur de création du socket");
+		printf("[NOK] - Erreur de création du socket \n");
 		return -1;
 	}
 
@@ -49,40 +55,47 @@ int main(void)
 	// Écoute du port
 	inputStream = bind(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
 	if(inputStream < 0){
-		printf("[NOK] - Erreur d'eçoute du port");
+		printf("[NOK] - Erreur d'eçoute du port \n");
 		return -1;
 	}
 
 	if(listen(serverSocket, 10) == 0){
-		printf("[Server] - En attente de flux");
+		printf("[Server] - En attente de flux \n");
 	} else {
-		printf("[NOK] - Erreur d'eçoute du port");
+		printf("[NOK] - Erreur d'eçoute du port \n");
 		return -1;
 	}
 
 	// Gestion des nouveaux clients
-	while(1){
+	while(nb_client_connected < nb_client_max){
 		newSocket = accept(serverSocket, (struct sockaddr*)&newAddr, &addr_size);
-
+		
 		if(newSocket < 0) {
-			printf("[NOK] - Erreur de connexion d'un client");
+			printf("[NOK] - Erreur de connexion d'un client \n");
 			return -1;
 		}
-		printf("Connexion d'un nouveau joueur");
 
-		// Création d'un nouveau processus pour le nouveau client
-		if((childpid = fork()) == 0){
-			// fermeture du socket dans le nouveau processus (Éviter fork bomb)
-			close(serverSocket);
-			// Reception des messages du client
-			while(1) {
-				recv(newSocket, buffer, 1024, 0);
-				printf("[Client] : %s\n", buffer);
-				send(newSocket, buffer, strlen(buffer), 0);
-				bzero(buffer, sizeof(buffer));
+		printf("Connexion d'un nouveau joueur \n");
+		clients_connected[nb_client_connected] = newSocket;
+		nb_client_connected ++;	
+	}
+
+	// Reception des messages du client
+	while(1) {
+		for(int i = 0; i < nb_client_connected; i++) {
+			send(clients_connected[i], ask_player, sizeof(ask_player), 0);
+			recv(clients_connected[i], buffer, 1024, 0);
+			printf("[Client] : %s\n", buffer);
+			
+			// Diffussion à tout les joueurs des messages écrits
+			for(int y = 0; y < nb_client_connected; y++) {
+				send(clients_connected[y], buffer, sizeof(buffer), 0);
 			}
+
+			bzero(buffer, sizeof(buffer));
 		}
 	}
 
     return 0;
 }
+
