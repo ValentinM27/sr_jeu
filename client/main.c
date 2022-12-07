@@ -54,6 +54,8 @@ int main(int argc, char **argv)
 
 	// I/O Client/Server
 	while(1){
+
+		// Tant que ce n'est pas son tour, le joueur doit attendre
 		while(strcmp(buffer, ask_player) != 0) {
 			printf("[Wait][Server] \n");
 			recv(clientSocket, buffer, 1024, 0);

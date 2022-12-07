@@ -86,9 +86,9 @@ int main(void)
 			send(clients_connected[i], ask_player, sizeof(ask_player), 0);
 			recv(clients_connected[i], buffer, 1024, 0);
 			printf("[Client] : %s\n", buffer);
-
+			
+			// Diffussion à tout les joueurs des messages écrits
 			for(int y = 0; y < nb_client_connected; y++) {
-				printf("send");
 				send(clients_connected[y], buffer, sizeof(buffer), 0);
 			}
 
