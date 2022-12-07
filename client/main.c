@@ -11,6 +11,8 @@
 #define server_PORT 8080
 #define server_IP "127.0.0.1"
 
+#define ask_player "C'est votre tour !"
+
 /**
  * @brief Client
  *
@@ -48,20 +50,24 @@ int main(int argc, char **argv)
 		printf("[NOK] - Erreur de connexion au serveur \n");
 		return -1;
 	}
-	printf("[OK] - Connecté au serveur");
+	printf("[OK] - Connecté au serveur \n");
 
 	// I/O Client/Server
 	while(1){
-		printf("[Client] - Saisir un message :\t");
+		while(strcmp(buffer, ask_player) != 0) {
+			printf("[Wait][Server] \n");
+			recv(clientSocket, buffer, 1024, 0);
+			printf("[Server] : %s\n", buffer);		
+		}
+	
+		printf("[Client] - Saisir un message : ");
 		scanf("%s", &buffer[0]);
 		send(clientSocket, buffer, strlen(buffer), 0);
 
-		if(recv(clientSocket, buffer, 1024, 0) < 0){
-			printf("[NOK] - Erreur lors de la reception des données \n");
-		} else {
-			printf("[Server] - \t%s\n", buffer);
-		}
+		recv(clientSocket, buffer, 1024, 0);
+		printf("[Server] : %s\n", buffer);
 	}
 
 	return 0;
 }
+
