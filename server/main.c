@@ -10,7 +10,7 @@
 // Paramètres du serveur
 #define server_PORT 8080
 #define server_IP "127.0.0.1"
-#define nb_client_max 2
+
 #define ask_player "C'est votre tour !"
 
 /**
@@ -26,6 +26,16 @@ int main(void)
 	struct sockaddr_in serverAddr;
 
 	// Structure de stockage des clients
+	int nb_client_max;
+	int okNbClient = -1;
+
+	while (okNbClient == -1) {
+		printf("Nombre de joueurs (max 6): ");
+		scanf("%d", &nb_client_max);
+
+		if(nb_client_max <= 6) okNbClient = 0;
+	}
+
 	int clients_connected[nb_client_max];
 
 	// Gestion des connexions multiples
