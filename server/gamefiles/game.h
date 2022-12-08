@@ -19,6 +19,7 @@ typedef struct _PLAYER_ {
 
 // Variables du jeu
 int currentRound;
+int currentCardInCards;
 CARD cards[NB_CARD];
 
 // Tableau des joueurs
@@ -26,6 +27,8 @@ PLAYER players[6];
 
 // Déclaraction des fonctions
 void createCards();
+CARD pickRandomCard();
+void initPackages();
 
 #endif
 
