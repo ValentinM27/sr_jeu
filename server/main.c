@@ -7,6 +7,9 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+// Import des fichiers du jeu
+#include "gamefiles/game.h"
+
 // Paramètres du serveur
 #define server_PORT 8080
 #define server_IP "127.0.0.1"
@@ -65,7 +68,7 @@ int main(void)
 	// Écoute du port
 	inputStream = bind(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
 	if(inputStream < 0){
-		printf("[NOK] - Erreur d'eçoute du port \n");
+		printf("[NOK] - Erreur d'écoute du port \n");
 		return -1;
 	}
 
@@ -79,7 +82,7 @@ int main(void)
 	// Gestion des nouveaux clients
 	while(nb_client_connected < nb_client_max){
 		newSocket = accept(serverSocket, (struct sockaddr*)&newAddr, &addr_size);
-		
+
 		if(newSocket < 0) {
 			printf("[NOK] - Erreur de connexion d'un client \n");
 			return -1;
@@ -87,8 +90,11 @@ int main(void)
 
 		printf("Connexion d'un nouveau joueur \n");
 		clients_connected[nb_client_connected] = newSocket;
-		nb_client_connected ++;	
+		nb_client_connected ++;
 	}
+
+	// Initialisation du paquet de cartes
+	createCards();
 
 	// Reception des messages du client
 	while(1) {
@@ -96,7 +102,7 @@ int main(void)
 			send(clients_connected[i], ask_player, sizeof(ask_player), 0);
 			recv(clients_connected[i], buffer, 1024, 0);
 			printf("[Client] : %s\n", buffer);
-			
+
 			// Diffussion à tout les joueurs des messages écrits
 			for(int y = 0; y < nb_client_connected; y++) {
 				send(clients_connected[y], buffer, sizeof(buffer), 0);

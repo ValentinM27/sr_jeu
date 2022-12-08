@@ -59,9 +59,9 @@ int main(int argc, char **argv)
 		while(strcmp(buffer, ask_player) != 0) {
 			printf("[Wait][Server] \n");
 			recv(clientSocket, buffer, 1024, 0);
-			printf("[Server] : %s\n", buffer);		
+			printf("[Server] : %s\n", buffer);
 		}
-	
+
 		printf("[Client] - Saisir un message : ");
 		scanf("%s", &buffer[0]);
 		send(clientSocket, buffer, strlen(buffer), 0);
