@@ -93,15 +93,9 @@ int main(void)
 		nb_client_connected ++;
 	}
 
-	// Initialisation du paquet de cartes
-	createCards();
-	initPackages(nb_client_connected);
-
-	// Test d'affichage de la mains du joueur 0
-	for(int i = 0; i < 10; i++)
-	{
-		printf("[%d|%d] \n", players[0].playerCards[i].valeur, players[0].playerCards[i].cattleHead);	
-	}
+	// Initialisation de la partie
+	initGame(nb_client_connected);
+	printTable();
 
 	// Reception des messages du client
 	while(1) {

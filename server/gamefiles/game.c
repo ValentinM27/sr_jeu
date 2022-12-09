@@ -53,10 +53,65 @@ CARD pickRandomCard()
  */
 void initPackages(int nbPlayers)
 {
-	for(int i = 0; i < nbPlayers; i++)
+	for(int i = 0; i < 10; i++)
 	{
-		for(int y = 0; y < 10; y++)
-			players[i].playerCards[y] = pickRandomCard();
+		for(int y = 0; y < nbPlayers; y++)
+			players[y].playerCards[i] = pickRandomCard();
+	}
+}
+
+/**
+ * Tirage au sort ordonné des carte de départ
+ */
+void initTable()
+{
+	// Stockage des cartes tirées
+	CARD randomCard[4];
+
+	// Tirage des cartes
+	for (int i = 0; i < 4; i++) {
+		randomCard[i] = pickRandomCard();
+	}
+
+	// Trie des cartes
+	for (int i = 0; i < 4; i++) {
+		for (int y = 0; y < 4; y++) {
+			if (randomCard[i].valeur > randomCard[y].valeur) {
+				CARD temp_a = randomCard[i];
+				randomCard[i] = randomCard[y];
+				randomCard[y] = temp_a;
+			}	
+		}
+	}
+
+	// Création de la table de jeu
+	for (int i = 0; i < 4; i++) {
+		table[i].row[0] = randomCard[i];
+	}
+}
+
+/**
+ * Permet d'initialiser le jeu
+ */
+void initGame(int nbPlayers)
+{
+	/* Initiatisation du paquet */
+	createCards();
+
+	/* Création des mains des joueurs */
+	initPackages(nbPlayers);
+
+	/* Tirage des cartes de départ */
+	initTable();
+}
+
+/**
+ * Affichage de la table de jeu
+ */
+void printTable()
+{
+	for (int i = 0; i < 4; i++) {
+		printf("[%d|%d] \n", table[i].row[0].valeur, table[i].row[0].cattleHead);
 	}
 }
 
