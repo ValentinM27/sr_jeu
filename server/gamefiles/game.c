@@ -111,7 +111,23 @@ void initGame(int nbPlayers)
 void printTable()
 {
 	for (int i = 0; i < 4; i++) {
-		printf("[%d|%d] \n", table[i].row[0].valeur, table[i].row[0].cattleHead);
+
+		// Affichage de la première carte de la ligne
+		printf("Ligne %d: [%d|%d]", i+1, table[i].row[0].valeur, table[i].row[0].cattleHead);
+
+		int done = -1;
+		int currentIndex = 1;
+		
+		// Affichage du reste de la liste
+		while (done == -1) {
+			if (table[i].row[currentIndex].valeur == 0) {
+				done = 1;
+				printf("\n");
+			} else {
+				printf("[%d|%d]", table[i].row[currentIndex].valeur, table[i].row[currentIndex].cattleHead);
+				currentIndex ++;
+			}
+		}
 	}
 }
 
