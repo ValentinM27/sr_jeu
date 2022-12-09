@@ -137,3 +137,17 @@ int main(void)
     return 0;
 }
 
+/**
+ * Permet de vérifier si un joueur a gagné 
+ */
+bool checkIfPlayerWon(int nbConnectedPlayers)
+{
+	bool won = false;
+
+	for (int i = 0; i < nbConnectedPlayers; i++) {
+		if(players[i].score == 0) won = true;	
+	}
+	
+	return won;
+}
+

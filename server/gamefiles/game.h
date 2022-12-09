@@ -48,6 +48,7 @@ bool putCardOnTable(CARD cardToPlace, int playerIndex);
 void deleteCardFromPlayersCards(CARD cardToDelete, int playerIndex);
 void printPlayerCards(int playerIndex);
 void updatePlayerScore(int nbConnectedPlayers);
+bool checkIfPlayerWon(int nbConnectedPlayers);
 
 #endif
 
