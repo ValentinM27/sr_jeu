@@ -1,6 +1,9 @@
 #ifndef H_GL_GAME
 #define H_GL_GAME
 
+// Import des libs
+#include <stdbool.h>
+
 // Import des libs et définition des paramètres
 #define NB_CARD 105
 
@@ -9,7 +12,6 @@ typedef struct _CARD_ {
 	int valeur;
 	int cattleHead;
 } CARD;
-
 
 /* Définition de la structure d'un joueur */
 typedef struct _PLAYER_ {
@@ -20,6 +22,7 @@ typedef struct _PLAYER_ {
 /* Définition d'un rangé de carte sur la table */
 typedef struct _TABLEROW_ {
 	CARD row[NB_CARD];
+	int currentLastIndex;
 } TABLEROW;
 
 // Variables du jeu
@@ -40,6 +43,9 @@ void initPackages();
 void initTable();
 void initGame();
 void printTable();
+bool putCardOnTable(CARD cardToPlace, int playerIndex);
+void deleteCardFromPlayersCards(CARD cardToDelete, int playerIndex);
+void printPlayerCards(int playerIndex);
 
 #endif
 

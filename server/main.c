@@ -94,8 +94,23 @@ int main(void)
 	}
 
 	// Initialisation de la partie
+	printf("----- Début de la partie ----- \n");
 	initGame(nb_client_connected);
 	printTable();
+
+	// Carte dans la mains de J1
+	printf("--- Carte de J1 --- \n");
+	printPlayerCards(0);
+
+
+	// Test d'ajout d'une carte sur la table
+	printf("----- J1 pose une carte sur la table ----- \n");
+	putCardOnTable(players[0].playerCards[2], 0);
+	printTable();
+	
+	// Carte dans la mains de J1
+	printf("--- Carte de J1 --- \n");
+	printPlayerCards(0);
 
 	// Reception des messages du client
 	while(1) {
