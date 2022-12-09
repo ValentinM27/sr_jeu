@@ -101,6 +101,9 @@ int main(void)
 	// Carte dans la mains de J1
 	printf("--- Carte de J1 --- \n");
 	printPlayerCards(0);
+	
+	updatePlayerScore(nb_client_connected);
+	printf("\t -- Score : %d \n", players[0].score);
 
 
 	// Test d'ajout d'une carte sur la table
@@ -111,6 +114,9 @@ int main(void)
 	// Carte dans la mains de J1
 	printf("--- Carte de J1 --- \n");
 	printPlayerCards(0);
+	
+	updatePlayerScore(nb_client_connected);
+	printf("\t -- Score : %d \n", players[0].score);
 
 	// Reception des messages du client
 	while(1) {

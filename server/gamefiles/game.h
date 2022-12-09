@@ -16,6 +16,7 @@ typedef struct _CARD_ {
 /* Définition de la structure d'un joueur */
 typedef struct _PLAYER_ {
 	char name[12];
+	int score;
 	CARD playerCards[NB_CARD];
 } PLAYER;
 
@@ -46,6 +47,7 @@ void printTable();
 bool putCardOnTable(CARD cardToPlace, int playerIndex);
 void deleteCardFromPlayersCards(CARD cardToDelete, int playerIndex);
 void printPlayerCards(int playerIndex);
+void updatePlayerScore(int nbConnectedPlayers);
 
 #endif
 

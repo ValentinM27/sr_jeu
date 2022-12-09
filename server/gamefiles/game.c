@@ -206,3 +206,26 @@ void printPlayerCards(int playerIndex)
 	}
 }
 
+/**
+ * Permet de mettre à jour le score des joueurs
+ */
+void updatePlayerScore(int nbConnectedPlayers)
+{
+	for (int currentPlayer = 0; currentPlayer < nbConnectedPlayers; currentPlayer++) {
+		bool endOfHand = false;
+		int currentCard = 0;
+
+		// Réinitialisation du score du joueur
+		players[currentPlayer].score = 0;
+
+		while (!endOfHand) {
+			if (players[currentPlayer].playerCards[currentCard].valeur == 0) {
+				endOfHand = true;
+			} else {
+				players[currentPlayer].score += players[currentPlayer].playerCards[currentCard].cattleHead;
+				currentCard ++;
+			}
+		}
+	}
+}
+
