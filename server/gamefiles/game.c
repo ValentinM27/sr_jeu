@@ -87,6 +87,7 @@ void initTable()
 	// Création de la table de jeu
 	for (int i = 0; i < 4; i++) {
 		table[i].row[0] = randomCard[i];
+		table[i].currentLastIndex = 0;
 	}
 }
 
@@ -113,20 +114,94 @@ void printTable()
 	for (int i = 0; i < 4; i++) {
 
 		// Affichage de la première carte de la ligne
-		printf("Ligne %d: [%d|%d]", i+1, table[i].row[0].valeur, table[i].row[0].cattleHead);
+		printf(" [Ligne %d] \t", i+1);
 
-		int done = -1;
-		int currentIndex = 1;
-		
 		// Affichage du reste de la liste
-		while (done == -1) {
-			if (table[i].row[currentIndex].valeur == 0) {
-				done = 1;
-				printf("\n");
-			} else {
+		for(int currentIndex = 0; currentIndex <= table[i].currentLastIndex; currentIndex++) {
 				printf("[%d|%d]", table[i].row[currentIndex].valeur, table[i].row[currentIndex].cattleHead);
-				currentIndex ++;
-			}
+				
+				if (currentIndex == table[i].currentLastIndex)
+					printf("\n");
+		}
+	}
+}
+
+/**
+ * Permet de placer une carte sur la table
+ */
+bool putCardOnTable(CARD cardToPlace, int playerIndex)
+{
+	bool cardPlaced = false;
+	
+	for (int i = 0; i < 4; i++) {
+		if (table[i].row[table[i].currentLastIndex].valeur < cardToPlace.valeur) {
+			// On insert la carte dans la ligne	
+			table[i].row[table[i].currentLastIndex+1].valeur = cardToPlace.valeur;
+			table[i].row[table[i].currentLastIndex+1].cattleHead = cardToPlace.cattleHead;
+			table[i].currentLastIndex++;
+
+			// On retire la carte du paquet du joueur
+			deleteCardFromPlayersCards(cardToPlace, playerIndex);	
+			
+			// On arrête la recherche
+			cardPlaced = true;
+			break;
+		}
+	}
+
+	return cardPlaced;
+}
+
+/**
+ * Permet de supprimer une carte du paquet d'un joueur
+ */
+void deleteCardFromPlayersCards(CARD cardToDelete, int playerIndex)
+{
+	int indexOfTheDeletedCard;
+
+	for (int i = 0; i < NB_CARD; i++) {
+		if (
+			players[playerIndex].playerCards[i].valeur == cardToDelete.valeur &&	
+			players[playerIndex].playerCards[i].cattleHead == cardToDelete.cattleHead
+		) {
+			indexOfTheDeletedCard = i;
+			break;
+		}
+	}
+
+	for (int i = indexOfTheDeletedCard; i < NB_CARD; i++) {
+
+		// Si on arrive à la fin de la main du joueurs plus besoin d'effectuer la décallage
+		if(players[playerIndex].playerCards[i+1].valeur == 0) {
+			// On supprime la dernière carte de la main
+			players[playerIndex].playerCards[i].valeur = 0;
+			players[playerIndex].playerCards[i].cattleHead = 0;
+
+			break;
+		}
+
+		players[playerIndex].playerCards[i] = players[playerIndex].playerCards[i+1];
+	}		
+}
+
+/**
+ * Permet d'afficher les cartes d'un joueur
+ */
+void printPlayerCards(int playerIndex)
+{
+	bool end = false;
+	int currentIndex = 0;
+
+	while (!end) {
+		if (players[0].playerCards[currentIndex].valeur == 0) {
+			printf("\n");
+			end = true;
+		} else {
+			printf("[%d|%d]", 
+					players[playerIndex].playerCards[currentIndex].valeur,
+					players[playerIndex].playerCards[currentIndex].cattleHead);
+
+			currentIndex++;
 		}
 	}
 }
