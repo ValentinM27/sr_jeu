@@ -17,10 +17,18 @@ typedef struct _PLAYER_ {
 	CARD playerCards[NB_CARD];
 } PLAYER;
 
+/* Définition d'un rangé de carte sur la table */
+typedef struct _TABLEROW_ {
+	CARD row[NB_CARD];
+} TABLEROW;
+
 // Variables du jeu
 int currentRound;
 int currentCardInCards;
 CARD cards[NB_CARD];
+
+// Table de jeu
+TABLEROW table[4];
 
 // Tableau des joueurs
 PLAYER players[6];
@@ -29,6 +37,9 @@ PLAYER players[6];
 void createCards();
 CARD pickRandomCard();
 void initPackages();
+void initTable();
+void initGame();
+void printTable();
 
 #endif
 
