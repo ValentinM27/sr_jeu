@@ -74,8 +74,13 @@ int main(int argc, char **argv)
 			}
 			// Reception des cartes
 			else if(strcmp(CARD_ARRAY, buffer) == 0) {
+				send(clientSocket, CARD_ARRAY, sizeof(CARD_ARRAY), 0);
+
+				// Nombre de cartes
 				recv(clientSocket, buffer, 1024, 0);
-				printf("Vos cartes sont : %s \n", buffer);
+				int nbCards = atoi(buffer);
+
+				printf("\t Vous avez %d cartes \n", nbCards);
 			}
 			// Autres messages
 			else {

@@ -113,22 +113,34 @@ int main(void)
 				recv(clients_connected[i], buffer, 1024, 0);
 				// Copie nom
 				strcpy(players[i].name, buffer);
+
+				//On prévient le joueur qu'il va recevoir ses cartes
+				send(clients_connected[i], CARD_ARRAY, sizeof(CARD_ARRAY), 0);
+				recv(clients_connected[i], buffer, sizeof(buffer), 0);
+
+				if (strcmp(CARD_ARRAY, buffer) == 0) {
+					// On envoir la taille du tableau des cartes du joueur
+					char temp[4];
+					sprintf(temp, "%d", NB_CARD);
+
+					send(clients_connected[i], temp, sizeof(temp), 0);
+				}
 			}
 			beginGame();
-		}
+		} else {
+			for(int i = 0; i < nb_client_connected; i++) {
+				send(clients_connected[i], ask_player, sizeof(ask_player), 0);
+				recv(clients_connected[i], buffer, 1024, 0);
+				printf("[%s] : %s\n", players[i].name, buffer);
 
-		for(int i = 0; i < nb_client_connected; i++) {
-			send(clients_connected[i], ask_player, sizeof(ask_player), 0);
-			recv(clients_connected[i], buffer, 1024, 0);
-			printf("[%s] : %s\n", players[i].name, buffer);
+				// Diffussion à tout les joueurs des messages écrits
+				for(int y = 0; y < nb_client_connected; y++) {
+					send(clients_connected[y], buffer, sizeof(buffer), 0);
+				}
 
-			// Diffussion à tout les joueurs des messages écrits
-			for(int y = 0; y < nb_client_connected; y++) {
-				send(clients_connected[y], buffer, sizeof(buffer), 0);
 			}
-
-			bzero(buffer, sizeof(buffer));
 		}
+		bzero(buffer, sizeof(buffer));
 	}
 
     return 0;
