@@ -80,7 +80,7 @@ int main(void)
 	// Définition des paramètres serveur
 	serverAddr.sin_family = AF_INET;
 	serverAddr.sin_port = htons(server_PORT);
-	serverAddr.sin_addr.s_addr = inet_addr(server_IP);
+	serverAddr.sin_addr.s_addr = INADDR_ANY;
 
 	// Écoute du port
 	inputStream = bind(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
