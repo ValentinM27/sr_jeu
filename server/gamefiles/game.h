@@ -4,7 +4,7 @@
 // Import des libs
 #include <stdbool.h>
 
-// Import des libs et définition des paramètres
+// Définition des paramètres
 #define NB_CARD 105
 
 /* Définition de la structure d'une carte */
@@ -16,6 +16,7 @@ typedef struct _CARD_ {
 /* Définition de la structure d'un joueur */
 typedef struct _PLAYER_ {
 	char name[12];
+	int score;
 	CARD playerCards[NB_CARD];
 } PLAYER;
 
@@ -29,6 +30,7 @@ typedef struct _TABLEROW_ {
 int currentRound;
 int currentCardInCards;
 CARD cards[NB_CARD];
+int nbPlayers;
 
 // Table de jeu
 TABLEROW table[4];
@@ -41,11 +43,18 @@ void createCards();
 CARD pickRandomCard();
 void initPackages();
 void initTable();
-void initGame();
+void initGame(int nbConnectedPlayers);
 void printTable();
 bool putCardOnTable(CARD cardToPlace, int playerIndex);
 void deleteCardFromPlayersCards(CARD cardToDelete, int playerIndex);
 void printPlayerCards(int playerIndex);
+void updatePlayerScore();
+bool checkIfPlayerWon();
+void startRound();
+void endRound();
+void beginGame();
+void endGame();
+void printPlayersScore();
 
 #endif
 

@@ -10,11 +10,28 @@
 // Import des fichiers du jeu
 #include "gamefiles/game.h"
 
+// Définitions du protocole de communication
+/* Permet de demander le nom du joueur */
+#define ASK_NAME "[ASK_NAME]"
+
+/* Permet d'envoyer une liste de carte */
+#define CARD_ARRAY "[CARD_ARRAY]"
+
+/* Permet de signifier la fin de l'envoie */
+#define END_CARD_ARRAY "[END_CARD_ARRAY]"
+
+/* Permet signifier une bonne reception par le client */
+#define RECEIVED "RECEIVED"
+
 // Paramètres du serveur
 #define server_PORT 8080
 #define server_IP "127.0.0.1"
 
+// Contenu pour le client
 #define ask_player "C'est votre tour !"
+#define game_start "-- Début de la partie --"
+
+/* Déclaration des prototypes des fonctions */
 
 /**
  * @brief Serveur
@@ -81,6 +98,7 @@ int main(void)
 
 	// Gestion des nouveaux clients
 	while(nb_client_connected < nb_client_max){
+		printf("Il faut encore %d joueurs \n", nb_client_max - nb_client_connected);
 		newSocket = accept(serverSocket, (struct sockaddr*)&newAddr, &addr_size);
 
 		if(newSocket < 0) {
@@ -93,39 +111,62 @@ int main(void)
 		nb_client_connected ++;
 	}
 
-	// Initialisation de la partie
-	printf("----- Début de la partie ----- \n");
-	initGame(nb_client_connected);
-	printTable();
-
-	// Carte dans la mains de J1
-	printf("--- Carte de J1 --- \n");
-	printPlayerCards(0);
-
-
-	// Test d'ajout d'une carte sur la table
-	printf("----- J1 pose une carte sur la table ----- \n");
-	putCardOnTable(players[0].playerCards[2], 0);
-	printTable();
-	
-	// Carte dans la mains de J1
-	printf("--- Carte de J1 --- \n");
-	printPlayerCards(0);
-
 	// Reception des messages du client
+	initGame(nb_client_connected);
+
 	while(1) {
-		for(int i = 0; i < nb_client_connected; i++) {
-			send(clients_connected[i], ask_player, sizeof(ask_player), 0);
-			recv(clients_connected[i], buffer, 1024, 0);
-			printf("[Client] : %s\n", buffer);
+		if(currentRound == 0) {
+			for(int i = 0; i < nb_client_connected; i++) {
+				// Demande du psœudo du joueur
+				send(clients_connected[i], ASK_NAME, sizeof(ASK_NAME), 0);
+				recv(clients_connected[i], buffer, 1024, 0);
+				// Copie nom
+				strcpy(players[i].name, buffer);
 
-			// Diffussion à tout les joueurs des messages écrits
-			for(int y = 0; y < nb_client_connected; y++) {
-				send(clients_connected[y], buffer, sizeof(buffer), 0);
+				//On prévient le joueur qu'il va recevoir ses cartes
+				send(clients_connected[i], CARD_ARRAY, sizeof(CARD_ARRAY), 0);
+				recv(clients_connected[i], buffer, sizeof(buffer), 0);
+
+				if (strcmp(CARD_ARRAY, buffer) == 0) {
+					// On envoie les cartes du joueur
+					bool isEnd = false;
+					int currentIndex = 0;
+
+					// On envoit les cartes avec une valeur qui n'est pas à 0
+					while (!isEnd) {
+						if (players[i].playerCards[currentIndex].valeur == 0) {
+							send(clients_connected[i], END_CARD_ARRAY, sizeof(END_CARD_ARRAY), 0);
+
+							// On clear le buffer pour le joueur suivant
+							bzero(buffer, sizeof(buffer));
+							isEnd = true;
+						} else {
+							char temp[4];
+							sprintf(temp, "%d", players[i].playerCards[currentIndex].valeur);
+
+							send(clients_connected[i], temp, sizeof(temp), 0);
+							recv(clients_connected[i], buffer, sizeof(buffer), 0);
+
+							if(strcmp(RECEIVED, buffer) == 0)
+								currentIndex ++;
+						}
+					}
+				}
 			}
+			beginGame();
+		} else {
+			for(int i = 0; i < nb_client_connected; i++) {
+				send(clients_connected[i], ask_player, sizeof(ask_player), 0);
+				recv(clients_connected[i], buffer, 1024, 0);
+				printf("[%s] : %s\n", players[i].name, buffer);
 
-			bzero(buffer, sizeof(buffer));
+				// Diffussion à tout les joueurs des messages écrits
+				for(int y = 0; y < nb_client_connected; y++) {
+					send(clients_connected[y], buffer, sizeof(buffer), 0);
+				}
+			}
 		}
+		bzero(buffer, sizeof(buffer));
 	}
 
     return 0;

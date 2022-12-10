@@ -6,10 +6,26 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <stdbool.h>
 
 // Paramètres de connexion
 #define server_PORT 8080
 #define server_IP "127.0.0.1"
+
+// Import des fichiers du jeu
+#include "gamefiles/game.h"
+
+/* Permet de demander le nom du joueur */
+#define ASK_NAME "[ASK_NAME]"
+
+/* Permet d'envoyer une liste de carte */
+#define CARD_ARRAY "[CARD_ARRAY]"
+
+/* Permet de signifier la fin de l'envoie */
+#define END_CARD_ARRAY "[END_CARD_ARRAY]"
+
+/* Permet signifier une bonne reception par le client */
+#define RECEIVED "RECEIVED"
 
 #define ask_player "C'est votre tour !"
 
@@ -54,20 +70,70 @@ int main(int argc, char **argv)
 
 	// I/O Client/Server
 	while(1){
-
 		// Tant que ce n'est pas son tour, le joueur doit attendre
 		while(strcmp(buffer, ask_player) != 0) {
-			printf("[Wait][Server] \n");
 			recv(clientSocket, buffer, 1024, 0);
-			printf("[Server] : %s\n", buffer);
+
+			// Demande de nom
+			if(strcmp(ASK_NAME, buffer) == 0) {
+				printf("Saisisez votre nom : ");
+				scanf("%s", &buffer[0]);
+				strcpy(you.name, buffer);
+				send(clientSocket, buffer, strlen(buffer), 0);
+			}
+			// Reception des cartes
+			else if(strcmp(CARD_ARRAY, buffer) == 0) {
+				send(clientSocket, CARD_ARRAY, sizeof(CARD_ARRAY), 0);
+
+				bool isEnd = false;
+				int currentIndex = 0;
+
+				while(!isEnd) {
+					recv(clientSocket, buffer, sizeof(buffer), 0);
+
+					if (strcmp(buffer, END_CARD_ARRAY) == 0) {
+						isEnd = true;
+						printPlayerCard();
+					} else {
+						// Convertiuon en int
+						int valeur = atoi(buffer);
+
+						// On rajoute la carte à la main du joueur
+						you.playerCards[currentIndex].valeur = valeur;
+
+						// Valeur de la tête de boeuf
+						you.playerCards[currentIndex].cattleHead = 1;
+
+						if(valeur == 55) {
+							you.playerCards[currentIndex].cattleHead = 7;
+						} else if((valeur)%11 == 0) {
+							you.playerCards[currentIndex].cattleHead = 5;
+						} else if((valeur)%10 == 0) {
+							you.playerCards[currentIndex].cattleHead = 3;
+						} else if((valeur)%5 == 0) {
+							you.playerCards[currentIndex].cattleHead = 2;
+						}
+
+						currentIndex ++;
+						// Confirme la reception au serveur
+						send(clientSocket, RECEIVED, sizeof(RECEIVED), 0);
+					}
+				}
+			}
+			// Autres messages
+			else {
+				printf("[Server] : %s\n", buffer);
+			}
 		}
 
-		printf("[Client] - Saisir un message : ");
+		printf("[%s] - Saisir un message : ", you.name);
 		scanf("%s", &buffer[0]);
 		send(clientSocket, buffer, strlen(buffer), 0);
 
 		recv(clientSocket, buffer, 1024, 0);
 		printf("[Server] : %s\n", buffer);
+
+		bzero(buffer, sizeof(buffer));
 	}
 
 	return 0;
