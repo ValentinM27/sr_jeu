@@ -26,7 +26,7 @@ typedef struct _TABLEROW_ {
 } TABLEROW;
 
 // Varibles du jeu
-PLAYER you;
+extern PLAYER you;
 
 // Export des fonctions
 void printPlayerCard();

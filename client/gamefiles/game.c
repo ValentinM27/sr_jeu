@@ -6,6 +6,9 @@
 // En-tête
 #include "game.h"
 
+// Définition des fonctions
+PLAYER you;
+
 /**
  * Permet d'affciher les cartes du joueur
  */
