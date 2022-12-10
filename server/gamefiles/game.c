@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
 
 // En-tête
 #include "game.h"
@@ -51,7 +52,7 @@ CARD pickRandomCard()
 /**
  * Permet de créer les paquets de dápart des joueurs
  */
-void initPackages(int nbPlayers)
+void initPackages()
 {
 	for(int i = 0; i < 10; i++)
 	{
@@ -94,16 +95,25 @@ void initTable()
 /**
  * Permet d'initialiser le jeu
  */
-void initGame(int nbPlayers)
+void initGame(int nbConnectedPlayers)
 {
+	/* initialisation du tour en cours */
+	currentRound = 0;
+
+	/* Nombre réel de joueurs */
+	nbPlayers = nbConnectedPlayers;
+
 	/* Initiatisation du paquet */
 	createCards();
 
 	/* Création des mains des joueurs */
-	initPackages(nbPlayers);
+	initPackages();
 
 	/* Tirage des cartes de départ */
 	initTable();
+
+	/* Démarrage de la partie */
+	beginGame();
 }
 
 /**
@@ -209,9 +219,9 @@ void printPlayerCards(int playerIndex)
 /**
  * Permet de mettre à jour le score des joueurs
  */
-void updatePlayerScore(int nbConnectedPlayers)
+void updatePlayerScore()
 {
-	for (int currentPlayer = 0; currentPlayer < nbConnectedPlayers; currentPlayer++) {
+	for (int currentPlayer = 0; currentPlayer < nbPlayers; currentPlayer++) {
 		bool endOfHand = false;
 		int currentCard = 0;
 
@@ -225,6 +235,90 @@ void updatePlayerScore(int nbConnectedPlayers)
 				players[currentPlayer].score += players[currentPlayer].playerCards[currentCard].cattleHead;
 				currentCard ++;
 			}
+		}
+	}
+}
+
+
+/**
+ * Permet de vérifier si un joueur a gagné 
+ */
+bool checkIfPlayerWon()
+{
+	bool won = false;
+
+	for (int i = 0; i < nbPlayers; i++) {
+		if(players[i].score == 0) won = true;	
+	}
+	
+	return won;
+}
+
+/**
+ * Permet de commencer une nouveau tour
+ */
+void startRound()
+{
+	updatePlayerScore();
+	currentRound ++;
+
+	printf("\t -- Début du tour %d -- \n", currentRound);
+	printTable();
+}
+
+/**
+ * Permet de terminer un round 
+ */
+void endRound()
+{	
+	updatePlayerScore();
+	printf("\t -- Fin du tour %d -- \n", currentRound);
+	printTable();
+
+	// Si un joueur a gagné, on arrête la partie
+	if (checkIfPlayerWon()) {
+		endGame();
+	} else {
+		startRound();
+	}
+}
+
+
+/**
+ * Permet démarer la partie
+ */
+void beginGame()
+{	
+	printf("----- Début de la partie ----- \n");
+	startRound();
+}
+
+/**
+ * Permet de terminer la partie
+ */
+void endGame()
+{
+	printf("\t ---------------------\n");
+	printf("\t | Partie terminée ! |\n");
+	printf("\t ---------------------\n");
+
+	/* Affichage des scores de tout les joueur */
+	printPlayersScore();
+
+	/* Fermeture du serveur */ 
+	exit(0);
+}
+
+/**
+ * Permet d'afficher le score de tout les joueur
+ */
+void printPlayersScore()
+{
+	for (int i = 0; i < nbPlayers; i++) {
+		if(players[i].score == 0) {
+			printf("\t \t %s : %d points => Vainqeur ! \n", players[i].name, players[i].score);
+		} else {
+			printf("\t \t %s : %d points \n", players[i].name, players[i].score);
 		}
 	}
 }

@@ -94,30 +94,8 @@ int main(void)
 	}
 
 	// Initialisation de la partie
-	printf("----- Début de la partie ----- \n");
 	initGame(nb_client_connected);
-	printTable();
-
-	// Carte dans la mains de J1
-	printf("--- Carte de J1 --- \n");
-	printPlayerCards(0);
 	
-	updatePlayerScore(nb_client_connected);
-	printf("\t -- Score : %d \n", players[0].score);
-
-
-	// Test d'ajout d'une carte sur la table
-	printf("----- J1 pose une carte sur la table ----- \n");
-	putCardOnTable(players[0].playerCards[2], 0);
-	printTable();
-	
-	// Carte dans la mains de J1
-	printf("--- Carte de J1 --- \n");
-	printPlayerCards(0);
-	
-	updatePlayerScore(nb_client_connected);
-	printf("\t -- Score : %d \n", players[0].score);
-
 	// Reception des messages du client
 	while(1) {
 		for(int i = 0; i < nb_client_connected; i++) {
@@ -135,19 +113,5 @@ int main(void)
 	}
 
     return 0;
-}
-
-/**
- * Permet de vérifier si un joueur a gagné 
- */
-bool checkIfPlayerWon(int nbConnectedPlayers)
-{
-	bool won = false;
-
-	for (int i = 0; i < nbConnectedPlayers; i++) {
-		if(players[i].score == 0) won = true;	
-	}
-	
-	return won;
 }
 
