@@ -1,6 +1,8 @@
 #ifndef H_GL_GAME
 #define H_GL_GAME
 
+#include <stdbool.h>
+
 // Définition des paramètres
 #define NB_CARD 105
 
@@ -25,5 +27,8 @@ typedef struct _TABLEROW_ {
 
 // Varibles du jeu
 PLAYER you;
+
+// Export des fonctions
+void printPlayerCard();
 
 #endif

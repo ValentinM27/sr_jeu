@@ -11,9 +11,17 @@
 #include "gamefiles/game.h"
 
 // Définitions du protocole de communication
-/* Permet d'envoyer une liste de carte */
+/* Permet de demander le nom du joueur */
 #define ASK_NAME "[ASK_NAME]"
+
+/* Permet d'envoyer une liste de carte */
 #define CARD_ARRAY "[CARD_ARRAY]"
+
+/* Permet de signifier la fin de l'envoie */
+#define END_CARD_ARRAY "[END_CARD_ARRAY]"
+
+/* Permet signifier une bonne reception par le client */
+#define RECEIVED "RECEIVED"
 
 // Paramètres du serveur
 #define server_PORT 8080
@@ -90,6 +98,7 @@ int main(void)
 
 	// Gestion des nouveaux clients
 	while(nb_client_connected < nb_client_max){
+		printf("Il faut encore %d joueurs \n", nb_client_max - nb_client_connected);
 		newSocket = accept(serverSocket, (struct sockaddr*)&newAddr, &addr_size);
 
 		if(newSocket < 0) {
@@ -119,11 +128,29 @@ int main(void)
 				recv(clients_connected[i], buffer, sizeof(buffer), 0);
 
 				if (strcmp(CARD_ARRAY, buffer) == 0) {
-					// On envoir la taille du tableau des cartes du joueur
-					char temp[4];
-					sprintf(temp, "%d", NB_CARD);
+					// On envoie les cartes du joueur
+					bool isEnd = false;
+					int currentIndex = 0;
 
-					send(clients_connected[i], temp, sizeof(temp), 0);
+					// On envoit les cartes avec une valeur qui n'est pas à 0
+					while (!isEnd) {
+						if (players[i].playerCards[currentIndex].valeur == 0) {
+							send(clients_connected[i], END_CARD_ARRAY, sizeof(END_CARD_ARRAY), 0);
+
+							// On clear le buffer pour le joueur suivant
+							bzero(buffer, sizeof(buffer));
+							isEnd = true;
+						} else {
+							char temp[4];
+							sprintf(temp, "%d", players[i].playerCards[currentIndex].valeur);
+
+							send(clients_connected[i], temp, sizeof(temp), 0);
+							recv(clients_connected[i], buffer, sizeof(buffer), 0);
+
+							if(strcmp(RECEIVED, buffer) == 0)
+								currentIndex ++;
+						}
+					}
 				}
 			}
 			beginGame();
@@ -137,7 +164,6 @@ int main(void)
 				for(int y = 0; y < nb_client_connected; y++) {
 					send(clients_connected[y], buffer, sizeof(buffer), 0);
 				}
-
 			}
 		}
 		bzero(buffer, sizeof(buffer));
