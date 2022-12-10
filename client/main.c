@@ -11,6 +11,13 @@
 #define server_PORT 8080
 #define server_IP "127.0.0.1"
 
+// Import des fichiers du jeu
+#include "gamefiles/game.h"
+
+/* Permet d'envoyer une liste de carte */
+#define ASK_NAME "[ASK_NAME]"
+#define CARD_ARRAY "[CARD_ARRAY]"
+
 #define ask_player "C'est votre tour !"
 
 /**
@@ -54,20 +61,36 @@ int main(int argc, char **argv)
 
 	// I/O Client/Server
 	while(1){
-
 		// Tant que ce n'est pas son tour, le joueur doit attendre
 		while(strcmp(buffer, ask_player) != 0) {
-			printf("[Wait][Server] \n");
 			recv(clientSocket, buffer, 1024, 0);
-			printf("[Server] : %s\n", buffer);
+
+			// Demande de nom
+			if(strcmp(ASK_NAME, buffer) == 0) {
+				printf("Saisisez votre nom : ");
+				scanf("%s", &buffer[0]);
+				strcpy(you.name, buffer);
+				send(clientSocket, buffer, strlen(buffer), 0);
+			}
+			// Reception des cartes
+			else if(strcmp(CARD_ARRAY, buffer) == 0) {
+				recv(clientSocket, buffer, 1024, 0);
+				printf("Vos cartes sont : %s \n", buffer);
+			}
+			// Autres messages
+			else {
+				printf("[Server] : %s\n", buffer);
+			}
 		}
 
-		printf("[Client] - Saisir un message : ");
+		printf("[%s] - Saisir un message : ", you.name);
 		scanf("%s", &buffer[0]);
 		send(clientSocket, buffer, strlen(buffer), 0);
 
 		recv(clientSocket, buffer, 1024, 0);
 		printf("[Server] : %s\n", buffer);
+
+		bzero(buffer, sizeof(buffer));
 	}
 
 	return 0;

@@ -4,7 +4,7 @@
 // Import des libs
 #include <stdbool.h>
 
-// Import des libs et définition des paramètres
+// Définition des paramètres
 #define NB_CARD 105
 
 /* Définition de la structure d'une carte */

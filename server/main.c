@@ -10,11 +10,20 @@
 // Import des fichiers du jeu
 #include "gamefiles/game.h"
 
+// Définitions du protocole de communication
+/* Permet d'envoyer une liste de carte */
+#define ASK_NAME "[ASK_NAME]"
+#define CARD_ARRAY "[CARD_ARRAY]"
+
 // Paramètres du serveur
 #define server_PORT 8080
 #define server_IP "127.0.0.1"
 
+// Contenu pour le client
 #define ask_player "C'est votre tour !"
+#define game_start "-- Début de la partie --"
+
+/* Déclaration des prototypes des fonctions */
 
 /**
  * @brief Serveur
@@ -93,15 +102,25 @@ int main(void)
 		nb_client_connected ++;
 	}
 
-	// Initialisation de la partie
-	initGame(nb_client_connected);
-	
 	// Reception des messages du client
+	initGame(nb_client_connected);
+
 	while(1) {
+		if(currentRound == 0) {
+			for(int i = 0; i < nb_client_connected; i++) {
+				// Demande du psœudo du joueur
+				send(clients_connected[i], ASK_NAME, sizeof(ASK_NAME), 0);
+				recv(clients_connected[i], buffer, 1024, 0);
+				// Copie nom
+				strcpy(players[i].name, buffer);
+			}
+			beginGame();
+		}
+
 		for(int i = 0; i < nb_client_connected; i++) {
 			send(clients_connected[i], ask_player, sizeof(ask_player), 0);
 			recv(clients_connected[i], buffer, 1024, 0);
-			printf("[Client] : %s\n", buffer);
+			printf("[%s] : %s\n", players[i].name, buffer);
 
 			// Diffussion à tout les joueurs des messages écrits
 			for(int y = 0; y < nb_client_connected; y++) {

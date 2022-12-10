@@ -16,7 +16,7 @@ void createCards()
 		CARD tempCard;
 		tempCard.valeur = i+1;
 		tempCard.cattleHead = 1;
-		
+
 		if(i+1 == 55) {
 			tempCard.cattleHead = 7;
 		} else if((i+1)%11 == 0) {
@@ -38,10 +38,10 @@ void createCards()
 CARD pickRandomCard()
 {
 	srand(time(NULL));
-	
+
 	int randIndex = rand()%(currentCardInCards);
-	CARD randomCard = cards[randIndex];	
-	
+	CARD randomCard = cards[randIndex];
+
 	// On insert la dernière carte du paquet à la place de la carte tirée
 	cards[randIndex] = cards[currentCardInCards];
 	currentCardInCards--;
@@ -81,7 +81,7 @@ void initTable()
 				CARD temp_a = randomCard[i];
 				randomCard[i] = randomCard[y];
 				randomCard[y] = temp_a;
-			}	
+			}
 		}
 	}
 
@@ -111,9 +111,6 @@ void initGame(int nbConnectedPlayers)
 
 	/* Tirage des cartes de départ */
 	initTable();
-
-	/* Démarrage de la partie */
-	beginGame();
 }
 
 /**
@@ -129,7 +126,7 @@ void printTable()
 		// Affichage du reste de la liste
 		for(int currentIndex = 0; currentIndex <= table[i].currentLastIndex; currentIndex++) {
 				printf("[%d|%d]", table[i].row[currentIndex].valeur, table[i].row[currentIndex].cattleHead);
-				
+
 				if (currentIndex == table[i].currentLastIndex)
 					printf("\n");
 		}
@@ -142,17 +139,17 @@ void printTable()
 bool putCardOnTable(CARD cardToPlace, int playerIndex)
 {
 	bool cardPlaced = false;
-	
+
 	for (int i = 0; i < 4; i++) {
 		if (table[i].row[table[i].currentLastIndex].valeur < cardToPlace.valeur) {
-			// On insert la carte dans la ligne	
+			// On insert la carte dans la ligne
 			table[i].row[table[i].currentLastIndex+1].valeur = cardToPlace.valeur;
 			table[i].row[table[i].currentLastIndex+1].cattleHead = cardToPlace.cattleHead;
 			table[i].currentLastIndex++;
 
 			// On retire la carte du paquet du joueur
-			deleteCardFromPlayersCards(cardToPlace, playerIndex);	
-			
+			deleteCardFromPlayersCards(cardToPlace, playerIndex);
+
 			// On arrête la recherche
 			cardPlaced = true;
 			break;
@@ -171,7 +168,7 @@ void deleteCardFromPlayersCards(CARD cardToDelete, int playerIndex)
 
 	for (int i = 0; i < NB_CARD; i++) {
 		if (
-			players[playerIndex].playerCards[i].valeur == cardToDelete.valeur &&	
+			players[playerIndex].playerCards[i].valeur == cardToDelete.valeur &&
 			players[playerIndex].playerCards[i].cattleHead == cardToDelete.cattleHead
 		) {
 			indexOfTheDeletedCard = i;
@@ -191,7 +188,7 @@ void deleteCardFromPlayersCards(CARD cardToDelete, int playerIndex)
 		}
 
 		players[playerIndex].playerCards[i] = players[playerIndex].playerCards[i+1];
-	}		
+	}
 }
 
 /**
@@ -207,7 +204,7 @@ void printPlayerCards(int playerIndex)
 			printf("\n");
 			end = true;
 		} else {
-			printf("[%d|%d]", 
+			printf("[%d|%d]",
 					players[playerIndex].playerCards[currentIndex].valeur,
 					players[playerIndex].playerCards[currentIndex].cattleHead);
 
@@ -241,16 +238,16 @@ void updatePlayerScore()
 
 
 /**
- * Permet de vérifier si un joueur a gagné 
+ * Permet de vérifier si un joueur a gagné
  */
 bool checkIfPlayerWon()
 {
 	bool won = false;
 
 	for (int i = 0; i < nbPlayers; i++) {
-		if(players[i].score == 0) won = true;	
+		if(players[i].score == 0) won = true;
 	}
-	
+
 	return won;
 }
 
@@ -267,10 +264,10 @@ void startRound()
 }
 
 /**
- * Permet de terminer un round 
+ * Permet de terminer un round
  */
 void endRound()
-{	
+{
 	updatePlayerScore();
 	printf("\t -- Fin du tour %d -- \n", currentRound);
 	printTable();
@@ -288,7 +285,7 @@ void endRound()
  * Permet démarer la partie
  */
 void beginGame()
-{	
+{
 	printf("----- Début de la partie ----- \n");
 	startRound();
 }
@@ -305,7 +302,7 @@ void endGame()
 	/* Affichage des scores de tout les joueur */
 	printPlayersScore();
 
-	/* Fermeture du serveur */ 
+	/* Fermeture du serveur */
 	exit(0);
 }
 
