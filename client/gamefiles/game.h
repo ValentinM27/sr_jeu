@@ -29,8 +29,12 @@ typedef struct _TABLEROW_ {
 extern PLAYER you;
 extern int currentRound;
 
+// Table de jeu
+extern TABLEROW table[4];
+
 // Export des fonctions
 void printPlayerCard();
 CARD createCard(int valeur);
+void printTable();
 
 #endif
