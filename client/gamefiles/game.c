@@ -118,3 +118,51 @@ void deleteCardFromHand(CARD cardToDelete)
 		you.playerCards[i] = you.playerCards[i+1];
 	}
 }
+
+/**
+ * Permet de savoir si le joueur peux poser une carte
+ */
+bool canPlay()
+{
+	bool canPlay = false;
+
+	bool isEnd = 0;
+	int currentIndex = 0;
+
+	while(!isEnd) {
+		if(you.playerCards[currentIndex].valeur == 0) isEnd = true;
+
+		else {
+			// On compare la carte à la dernière carte de chaque ligne
+			for (int i = 0; i < 4; i++)
+			{
+				canPlay = table[i].row[table[i].currentLastIndex].valeur < you.playerCards[currentIndex].valeur;
+				currentIndex++;
+
+				// Si le joueur peux jouer cette carte, on arrête la recherche
+				isEnd = canPlay;
+
+				if(isEnd) break;
+			}
+		}
+	}
+
+	return canPlay;
+}
+
+/**
+ * Permet de vérifier si le joueur peux poser la carte sélectionnée
+ */
+bool checkCanPlayThisCard(CARD cardToPlay)
+{
+	bool canPlay = false;
+
+	for (int i = 0; i < 4; i++) {
+		canPlay = table[i].row[table[i].currentLastIndex].valeur < cardToPlay.valeur;
+
+		// Si le joueur peux jouer, on quitte la boucle
+		if(canPlay) break;
+	}
+
+	return canPlay;
+}

@@ -166,19 +166,32 @@ int main(int argc, char **argv)
 			}
 			// Poser carte
 			else if (strcmp(buffer, ASK_FOR_PLAY) == 0) {
-				int indexOfCard;
-				printf("Quelle carte voulez-vous poser ? ");
-				scanf("%d", &indexOfCard);
+				// Si le joueur peux poser il le fait
+				if(canPlay()) {
+					int indexOfCard;
+					bool ok = false;
 
-				char indexOfCardToChar[4];
-				sprintf(indexOfCardToChar, "%d", indexOfCard);
-				send(clientSocket, indexOfCardToChar, sizeof(indexOfCardToChar), 0);
+					while (!ok) {
+						printf("Quelle carte voulez-vous poser ? ");
+						scanf("%d", &indexOfCard);
 
-				recv(clientSocket, buffer, sizeof(buffer), 0);
+						ok = checkCanPlayThisCard(you.playerCards[indexOfCard]);
+					}
 
-				if(strcmp(buffer, RECEIVED) == 0) {
-					// On supprime la carte de la main du joueur
-					deleteCardFromHand(you.playerCards[indexOfCard]);
+					char indexOfCardToChar[4];
+					sprintf(indexOfCardToChar, "%d", indexOfCard);
+					send(clientSocket, indexOfCardToChar, sizeof(indexOfCardToChar), 0);
+
+					recv(clientSocket, buffer, sizeof(buffer), 0);
+
+					if(strcmp(buffer, RECEIVED) == 0) {
+						// On supprime la carte de la main du joueur
+						deleteCardFromHand(you.playerCards[indexOfCard]);
+					}
+				}
+				// Sinon il prend les carte de la ligne souhaitée
+				else {
+
 				}
 			}
 			// Autres messages

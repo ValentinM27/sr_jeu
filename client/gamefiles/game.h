@@ -37,5 +37,7 @@ void printPlayerCard();
 CARD createCard(int valeur);
 void printTable();
 void deleteCardFromHand(CARD cardToDelete);
+bool canPlay();
+bool checkCanPlayThisCard(CARD cardToPlay);
 
 #endif
