@@ -30,5 +30,6 @@ extern PLAYER you;
 
 // Export des fonctions
 void printPlayerCard();
+CARD createCard(int valeur);
 
 #endif

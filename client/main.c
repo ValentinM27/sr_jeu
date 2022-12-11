@@ -98,23 +98,10 @@ int main(int argc, char **argv)
 						// Convertiuon en int
 						int valeur = atoi(buffer);
 
-						// On rajoute la carte à la main du joueur
-						you.playerCards[currentIndex].valeur = valeur;
-
-						// Valeur de la tête de boeuf
-						you.playerCards[currentIndex].cattleHead = 1;
-
-						if(valeur == 55) {
-							you.playerCards[currentIndex].cattleHead = 7;
-						} else if((valeur)%11 == 0) {
-							you.playerCards[currentIndex].cattleHead = 5;
-						} else if((valeur)%10 == 0) {
-							you.playerCards[currentIndex].cattleHead = 3;
-						} else if((valeur)%5 == 0) {
-							you.playerCards[currentIndex].cattleHead = 2;
-						}
-
+						// On créer la carte
+						you.playerCards[currentIndex] = createCard(valeur);
 						currentIndex ++;
+
 						// Confirme la reception au serveur
 						send(clientSocket, RECEIVED, sizeof(RECEIVED), 0);
 					}

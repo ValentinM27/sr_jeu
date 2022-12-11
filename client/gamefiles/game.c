@@ -32,3 +32,26 @@ void printPlayerCard()
 		}
 	}
 }
+
+/**
+ * Permet d'associer la bonne valeur de tête de boeuf à une carte
+ */
+CARD createCard(int valeur)
+{
+	CARD createdCard;
+
+	createdCard.valeur = valeur;
+	createdCard.cattleHead = 1;
+
+	if(valeur == 55) {
+		createdCard.cattleHead = 7;
+	} else if((valeur)%11 == 0) {
+		createdCard.cattleHead = 5;
+	} else if((valeur)%10 == 0) {
+		createdCard.cattleHead = 3;
+	} else if((valeur)%5 == 0) {
+		createdCard.cattleHead = 2;
+	}
+
+	return createdCard;
+}
