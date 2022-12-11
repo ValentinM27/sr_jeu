@@ -8,6 +8,7 @@
 
 // Définition des fonctions
 PLAYER you;
+int currentRound;
 
 /**
  * Permet d'affciher les cartes du joueur

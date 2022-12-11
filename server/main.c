@@ -20,6 +20,18 @@
 /* Permet de signifier la fin de l'envoie */
 #define END_CARD_ARRAY "[END_CARD_ARRAY]"
 
+/* Permet dez signifier l'envoie des cartes de la table*/
+#define TABLE_CARD_ARRAY "[TABLE_CARD_ARRAY]"
+
+/* Permet de signifier le chagement de ligne */
+#define TABLE_CARD_NEXT_ROW "[TABLE_CARD_NEXT_ROW]"
+
+/* Permet de signifier la fin des cartes de la table */
+#define TABLE_CARD_ARRAY_END "[TABLE_CARD_ARRAY_END]"
+
+/* Permet de signaler le début du round aux joueurs */
+#define NEW_ROUND "[NEW_ROUND]"
+
 /* Permet signifier une bonne reception par le client */
 #define RECEIVED "RECEIVED"
 
@@ -155,6 +167,21 @@ int main(void)
 			}
 			beginGame();
 		} else {
+			// On signal le round en cours aux joueur
+			for (int i = 0; i < nb_client_connected; i++) {
+				send(clients_connected[i], NEW_ROUND, sizeof(NEW_ROUND), 0);
+				recv(clients_connected[i], buffer, sizeof(buffer), 0);
+
+				if (strcmp(NEW_ROUND, buffer) == 0) {
+					char temp[4];
+					sprintf(temp, "%d", currentRound);
+
+					send(clients_connected[i], temp, sizeof(temp), 0);
+				}
+
+				bzero(buffer, sizeof(buffer));
+			}
+
 			for(int i = 0; i < nb_client_connected; i++) {
 				send(clients_connected[i], ask_player, sizeof(ask_player), 0);
 				recv(clients_connected[i], buffer, 1024, 0);
@@ -164,6 +191,8 @@ int main(void)
 				for(int y = 0; y < nb_client_connected; y++) {
 					send(clients_connected[y], buffer, sizeof(buffer), 0);
 				}
+
+				bzero(buffer, sizeof(buffer));
 			}
 		}
 		bzero(buffer, sizeof(buffer));

@@ -24,6 +24,18 @@
 /* Permet de signifier la fin de l'envoie */
 #define END_CARD_ARRAY "[END_CARD_ARRAY]"
 
+/* Permet dez signifier l'envoie des cartes de la table*/
+#define TABLE_CARD_ARRAY "[TABLE_CARD_ARRAY]"
+
+/* Permet de signifier le chagement de ligne */
+#define TABLE_CARD_NEXT_ROW "[TABLE_CARD_NEXT_ROW]"
+
+/* Permet de signifier la fin des cartes de la table */
+#define TABLE_CARD_ARRAY_END "[TABLE_CARD_ARRAY_END]"
+
+/* Permet de signaler le début du round aux joueurs */
+#define NEW_ROUND "[NEW_ROUND]"
+
 /* Permet signifier une bonne reception par le client */
 #define RECEIVED "RECEIVED"
 
@@ -106,6 +118,13 @@ int main(int argc, char **argv)
 						send(clientSocket, RECEIVED, sizeof(RECEIVED), 0);
 					}
 				}
+			}
+			// Début de round
+			else if(strcmp(buffer, NEW_ROUND) == 0) {
+				send(clientSocket, NEW_ROUND, sizeof(NEW_ROUND), 0);
+				recv(clientSocket, buffer, sizeof(buffer), 0);
+				currentRound = atoi(buffer);
+				printf("\t -- Début du tour %d -- \n", currentRound);
 			}
 			// Autres messages
 			else {
