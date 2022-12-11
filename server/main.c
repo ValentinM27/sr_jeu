@@ -20,6 +20,18 @@
 /* Permet de signifier la fin de l'envoie */
 #define END_CARD_ARRAY "[END_CARD_ARRAY]"
 
+/* Permet dez signifier l'envoie des cartes de la table*/
+#define TABLE_CARD_ARRAY "[TABLE_CARD_ARRAY]"
+
+/* Permet de signifier l'envoie du dernier index d'une ligne de la table */
+#define TABLE_LAST_INDEX_OF_ROW "[TABLE_LAST_INDEX_OF_ROW]"
+
+/* Permet de signifier la fin des cartes de la table */
+#define TABLE_CARD_ARRAY_END "[TABLE_CARD_ARRAY_END]"
+
+/* Permet de signaler le début du round aux joueurs */
+#define NEW_ROUND "[NEW_ROUND]"
+
 /* Permet signifier une bonne reception par le client */
 #define RECEIVED "RECEIVED"
 
@@ -50,10 +62,10 @@ int main(void)
 	int okNbClient = -1;
 
 	while (okNbClient == -1) {
-		printf("Nombre de joueurs (max 6): ");
+		printf("Nombre de joueurs (min 2, max 6): ");
 		scanf("%d", &nb_client_max);
 
-		if(nb_client_max <= 6) okNbClient = 0;
+		if(nb_client_max >= 2 && nb_client_max <= 6) okNbClient = 0;
 	}
 
 	int clients_connected[nb_client_max];
@@ -80,7 +92,7 @@ int main(void)
 	// Définition des paramètres serveur
 	serverAddr.sin_family = AF_INET;
 	serverAddr.sin_port = htons(server_PORT);
-	serverAddr.sin_addr.s_addr = inet_addr(server_IP);
+	serverAddr.sin_addr.s_addr = INADDR_ANY;
 
 	// Écoute du port
 	inputStream = bind(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
@@ -155,7 +167,64 @@ int main(void)
 			}
 			beginGame();
 		} else {
+			// On signal le round en cours aux joueur
+			for (int i = 0; i < nb_client_connected; i++) {
+				send(clients_connected[i], NEW_ROUND, sizeof(NEW_ROUND), 0);
+				recv(clients_connected[i], buffer, sizeof(buffer), 0);
+
+				if (strcmp(NEW_ROUND, buffer) == 0) {
+					char temp[4];
+					sprintf(temp, "%d", currentRound);
+
+					send(clients_connected[i], temp, sizeof(temp), 0);
+				}
+			}
+
+			// On envoie la table au début du round aux joueurs
+			for (int i = 0; i < nb_client_connected; i++) {
+				// On prévient le joueur de l'envoie des cartes présentes sur la table
+				send(clients_connected[i], TABLE_CARD_ARRAY, sizeof(TABLE_CARD_ARRAY), 0);
+				recv(clients_connected[i], buffer, sizeof(buffer), 0);
+
+				// On procède à l'envoie de carte
+				if(strcmp(buffer, TABLE_CARD_ARRAY) == 0) {
+					for (int currentRow = 0; currentRow < 4; currentRow ++) {
+						send(clients_connected[i], TABLE_LAST_INDEX_OF_ROW, sizeof(TABLE_LAST_INDEX_OF_ROW), 0);
+						recv(clients_connected[i], buffer ,sizeof(buffer), 0);
+
+						if(strcmp(buffer, TABLE_LAST_INDEX_OF_ROW) == 0) {
+							char indexToChar[4];
+							sprintf(indexToChar, "%d", table[currentRow].currentLastIndex);
+
+							send(clients_connected[i], indexToChar, sizeof(indexToChar), 0);
+							recv(clients_connected[i], buffer, sizeof(buffer), 0);
+
+							// Envoie de la ligne au client
+							for(int currentCard = 0; currentCard <= table[currentRow].currentLastIndex; currentCard ++) {
+								char valeurToChar[4];
+								sprintf(valeurToChar, "%d", table[currentRow].row[currentCard].valeur);
+
+								send(clients_connected[i], valeurToChar, sizeof(valeurToChar), 0);
+								// Attente de la réponse du client avant le prochain envoi
+								recv(clients_connected[i], buffer, sizeof(buffer), 0);
+							}
+						}
+					}
+				}
+
+				// On signifie la fin de l'envoie des cartes de la table au client
+				send(clients_connected[i], TABLE_CARD_ARRAY_END, sizeof(TABLE_CARD_ARRAY_END), 0);
+			}
+
+			// On demande à chaque joueur de poser une carte
+
+			// On regarde si un joueur à gagné ...
+
+			// On clear le buffer
+			bzero(buffer, sizeof(buffer));
+
 			for(int i = 0; i < nb_client_connected; i++) {
+
 				send(clients_connected[i], ask_player, sizeof(ask_player), 0);
 				recv(clients_connected[i], buffer, 1024, 0);
 				printf("[%s] : %s\n", players[i].name, buffer);
@@ -164,6 +233,9 @@ int main(void)
 				for(int y = 0; y < nb_client_connected; y++) {
 					send(clients_connected[y], buffer, sizeof(buffer), 0);
 				}
+
+				// On clear le buffer pour le prochain joueur
+				bzero(buffer, sizeof(buffer));
 			}
 		}
 		bzero(buffer, sizeof(buffer));

@@ -6,6 +6,19 @@
 // En-tête
 #include "game.h"
 
+// Définition des variables
+// Variables du jeu
+int currentRound;
+int currentCardInCards;
+CARD cards[NB_CARD];
+int nbPlayers;
+
+// Table de jeu
+TABLEROW table[4];
+
+// Tableau des joueurs
+PLAYER players[6];
+
 /**
  * Permet d'initialiser les valeurs des cartes
  */

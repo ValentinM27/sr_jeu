@@ -24,6 +24,18 @@
 /* Permet de signifier la fin de l'envoie */
 #define END_CARD_ARRAY "[END_CARD_ARRAY]"
 
+/* Permet dez signifier l'envoie des cartes de la table*/
+#define TABLE_CARD_ARRAY "[TABLE_CARD_ARRAY]"
+
+/* Permet de signifier l'envoie du dernier index d'une ligne de la table */
+#define TABLE_LAST_INDEX_OF_ROW "[TABLE_LAST_INDEX_OF_ROW]"
+
+/* Permet de signifier la fin des cartes de la table */
+#define TABLE_CARD_ARRAY_END "[TABLE_CARD_ARRAY_END]"
+
+/* Permet de signaler le début du round aux joueurs */
+#define NEW_ROUND "[NEW_ROUND]"
+
 /* Permet signifier une bonne reception par le client */
 #define RECEIVED "RECEIVED"
 
@@ -72,7 +84,7 @@ int main(int argc, char **argv)
 	while(1){
 		// Tant que ce n'est pas son tour, le joueur doit attendre
 		while(strcmp(buffer, ask_player) != 0) {
-			recv(clientSocket, buffer, 1024, 0);
+			recv(clientSocket, buffer, sizeof(buffer), 0);
 
 			// Demande de nom
 			if(strcmp(ASK_NAME, buffer) == 0) {
@@ -98,27 +110,47 @@ int main(int argc, char **argv)
 						// Convertiuon en int
 						int valeur = atoi(buffer);
 
-						// On rajoute la carte à la main du joueur
-						you.playerCards[currentIndex].valeur = valeur;
-
-						// Valeur de la tête de boeuf
-						you.playerCards[currentIndex].cattleHead = 1;
-
-						if(valeur == 55) {
-							you.playerCards[currentIndex].cattleHead = 7;
-						} else if((valeur)%11 == 0) {
-							you.playerCards[currentIndex].cattleHead = 5;
-						} else if((valeur)%10 == 0) {
-							you.playerCards[currentIndex].cattleHead = 3;
-						} else if((valeur)%5 == 0) {
-							you.playerCards[currentIndex].cattleHead = 2;
-						}
-
+						// On créer la carte
+						you.playerCards[currentIndex] = createCard(valeur);
 						currentIndex ++;
+
 						// Confirme la reception au serveur
 						send(clientSocket, RECEIVED, sizeof(RECEIVED), 0);
 					}
 				}
+			}
+			// Début de round
+			else if(strcmp(buffer, NEW_ROUND) == 0) {
+				send(clientSocket, NEW_ROUND, sizeof(NEW_ROUND), 0);
+				recv(clientSocket, buffer, sizeof(buffer), 0);
+				currentRound = atoi(buffer);
+				printf("\t -- Début du tour %d -- \n", currentRound);
+			}
+			// Reception de l'état de la table
+			else if(strcmp(buffer, TABLE_CARD_ARRAY) == 0) {
+				send(clientSocket, TABLE_CARD_ARRAY, sizeof(TABLE_CARD_ARRAY), 0);
+
+				// Reception ligne par ligne
+				for (int currentRow = 0; currentRow < 4; currentRow ++) {
+					recv(clientSocket, buffer, sizeof(buffer), 0);
+					send(clientSocket, TABLE_LAST_INDEX_OF_ROW, sizeof(TABLE_LAST_INDEX_OF_ROW), 0);
+
+					// Reception dernier index de la ligne
+					recv(clientSocket, buffer, sizeof(buffer), 0);
+					table[currentRow].currentLastIndex = atoi(buffer);
+					send(clientSocket, RECEIVED, sizeof(RECEIVED), 0);
+
+					// Construction de la ligne
+					for(int currentCard = 0; currentCard <= table[currentRow].currentLastIndex; currentCard ++) {
+						recv(clientSocket, buffer, sizeof(buffer), 0);
+						table[currentRow].row[currentCard] = createCard(atoi(buffer));
+						send(clientSocket, RECEIVED, sizeof(RECEIVED), 0);
+					}
+				}
+
+				recv(clientSocket, buffer, sizeof(buffer), 0);
+				if(strcmp(buffer, TABLE_CARD_ARRAY_END) == 0)
+					printTable();
 			}
 			// Autres messages
 			else {

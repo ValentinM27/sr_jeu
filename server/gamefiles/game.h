@@ -27,16 +27,16 @@ typedef struct _TABLEROW_ {
 } TABLEROW;
 
 // Variables du jeu
-int currentRound;
-int currentCardInCards;
-CARD cards[NB_CARD];
-int nbPlayers;
+extern int currentRound;
+extern int currentCardInCards;
+extern CARD cards[NB_CARD];
+extern int nbPlayers;
 
 // Table de jeu
-TABLEROW table[4];
+extern TABLEROW table[4];
 
 // Tableau des joueurs
-PLAYER players[6];
+extern PLAYER players[6];
 
 // Déclaraction des fonctions
 void createCards();
