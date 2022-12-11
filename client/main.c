@@ -36,6 +36,12 @@
 /* Permet de signaler le début du round aux joueurs */
 #define NEW_ROUND "[NEW_ROUND]"
 
+/* Permet de demander à un joueur de poser une carte */
+#define ASK_FOR_PLAY "[ASK_FOR_PLAY]"
+
+/* Permet de demander à piocher une carte */
+#define DRAW "[DRAW]"
+
 /* Permet signifier une bonne reception par le client */
 #define RECEIVED "RECEIVED"
 
@@ -124,7 +130,13 @@ int main(int argc, char **argv)
 				send(clientSocket, NEW_ROUND, sizeof(NEW_ROUND), 0);
 				recv(clientSocket, buffer, sizeof(buffer), 0);
 				currentRound = atoi(buffer);
+
+				printf("\t ---------------------- \n");
 				printf("\t -- Début du tour %d -- \n", currentRound);
+				printf("\t ---------------------- \n");
+
+				// Affichage des cartes du joueur
+				printPlayerCard();
 			}
 			// Reception de l'état de la table
 			else if(strcmp(buffer, TABLE_CARD_ARRAY) == 0) {
@@ -152,18 +164,41 @@ int main(int argc, char **argv)
 				if(strcmp(buffer, TABLE_CARD_ARRAY_END) == 0)
 					printTable();
 			}
+			// Poser carte
+			else if (strcmp(buffer, ASK_FOR_PLAY) == 0) {
+				// Si le joueur peux poser il le fait
+				if(canPlay()) {
+					int indexOfCard;
+					bool ok = false;
+
+					while (!ok) {
+						printf("Quelle carte voulez-vous poser ? ");
+						scanf("%d", &indexOfCard);
+
+						ok = checkCanPlayThisCard(you.playerCards[indexOfCard]);
+					}
+
+					char indexOfCardToChar[4];
+					sprintf(indexOfCardToChar, "%d", indexOfCard);
+					send(clientSocket, indexOfCardToChar, sizeof(indexOfCardToChar), 0);
+
+					recv(clientSocket, buffer, sizeof(buffer), 0);
+
+					if(strcmp(buffer, RECEIVED) == 0) {
+						// On supprime la carte de la main du joueur
+						deleteCardFromHand(you.playerCards[indexOfCard]);
+					}
+				}
+				// Sinon il prend les carte de la ligne souhaitée
+				else {
+
+				}
+			}
 			// Autres messages
 			else {
 				printf("[Server] : %s\n", buffer);
 			}
 		}
-
-		printf("[%s] - Saisir un message : ", you.name);
-		scanf("%s", &buffer[0]);
-		send(clientSocket, buffer, strlen(buffer), 0);
-
-		recv(clientSocket, buffer, 1024, 0);
-		printf("[Server] : %s\n", buffer);
 
 		bzero(buffer, sizeof(buffer));
 	}

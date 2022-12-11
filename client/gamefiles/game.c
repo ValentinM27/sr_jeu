@@ -19,14 +19,17 @@ void printPlayerCard()
 	bool end = false;
 	int currentIndex = 0;
 
-	printf("\t -- Vos cartes -- \n");
+	printf("-- Vos cartes -- \n");
 
 	while (!end) {
 		if (you.playerCards[currentIndex].valeur == 0) {
 			printf("\n");
 			end = true;
 		} else {
-			printf("[%d|%d]",
+			if(currentIndex%3 == 0) printf("\n");
+
+			printf("\t %d : [%d|%d]",
+					currentIndex,
 					you.playerCards[currentIndex].valeur,
 					you.playerCards[currentIndex].cattleHead);
 
@@ -63,7 +66,13 @@ CARD createCard(int valeur)
  */
 void printTable()
 {
+	// Titre
+	printf("\t ---------------------- \n");
+	printf("\t - Carte sur la table - \n");
+	printf("\t ---------------------- \n");
+
 	for (int i = 0; i < 4; i++) {
+
 
 		// Affichage de la première carte de la ligne
 		printf(" [Ligne %d] \t", i+1);
@@ -76,4 +85,84 @@ void printTable()
 					printf("\n");
 		}
 	}
+}
+
+/**
+ * Permet de supprimer une carte de la main du joueur
+ */
+void deleteCardFromHand(CARD cardToDelete)
+{
+	int indexOfTheDeletedCard;
+
+	for (int i = 0; i < NB_CARD; i++) {
+		if (
+			you.playerCards[i].valeur == cardToDelete.valeur &&
+			you.playerCards[i].cattleHead == cardToDelete.cattleHead
+		) {
+			indexOfTheDeletedCard = i;
+			break;
+		}
+	}
+
+	for (int i = indexOfTheDeletedCard; i < NB_CARD; i++) {
+
+		// Si on arrive à la fin de la main du joueurs plus besoin d'effectuer la décallage
+		if(you.playerCards[i+1].valeur == 0) {
+			// On supprime la dernière carte de la main
+			you.playerCards[i].valeur = 0;
+			you.playerCards[i].cattleHead = 0;
+
+			break;
+		}
+
+		you.playerCards[i] = you.playerCards[i+1];
+	}
+}
+
+/**
+ * Permet de savoir si le joueur peux poser une carte
+ */
+bool canPlay()
+{
+	bool canPlay = false;
+
+	bool isEnd = 0;
+	int currentIndex = 0;
+
+	while(!isEnd) {
+		if(you.playerCards[currentIndex].valeur == 0) isEnd = true;
+
+		else {
+			// On compare la carte à la dernière carte de chaque ligne
+			for (int i = 0; i < 4; i++)
+			{
+				canPlay = table[i].row[table[i].currentLastIndex].valeur < you.playerCards[currentIndex].valeur;
+				currentIndex++;
+
+				// Si le joueur peux jouer cette carte, on arrête la recherche
+				isEnd = canPlay;
+
+				if(isEnd) break;
+			}
+		}
+	}
+
+	return canPlay;
+}
+
+/**
+ * Permet de vérifier si le joueur peux poser la carte sélectionnée
+ */
+bool checkCanPlayThisCard(CARD cardToPlay)
+{
+	bool canPlay = false;
+
+	for (int i = 0; i < 4; i++) {
+		canPlay = table[i].row[table[i].currentLastIndex].valeur < cardToPlay.valeur;
+
+		// Si le joueur peux jouer, on quitte la boucle
+		if(canPlay) break;
+	}
+
+	return canPlay;
 }

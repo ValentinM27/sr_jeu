@@ -32,6 +32,12 @@
 /* Permet de signaler le début du round aux joueurs */
 #define NEW_ROUND "[NEW_ROUND]"
 
+/* Permet de demander à un joueur de poser une carte */
+#define ASK_FOR_PLAY "[ASK_FOR_PLAY]"
+
+/* Permet de demander à piocher une carte */
+#define DRAW "[DRAW]"
+
 /* Permet signifier une bonne reception par le client */
 #define RECEIVED "RECEIVED"
 
@@ -180,7 +186,7 @@ int main(void)
 				}
 			}
 
-			// On envoie la table au début du round aux joueurs
+			// On envoie la table au joueur puis on lui demande de poser une carte
 			for (int i = 0; i < nb_client_connected; i++) {
 				// On prévient le joueur de l'envoie des cartes présentes sur la table
 				send(clients_connected[i], TABLE_CARD_ARRAY, sizeof(TABLE_CARD_ARRAY), 0);
@@ -210,33 +216,30 @@ int main(void)
 							}
 						}
 					}
+
 				}
 
 				// On signifie la fin de l'envoie des cartes de la table au client
 				send(clients_connected[i], TABLE_CARD_ARRAY_END, sizeof(TABLE_CARD_ARRAY_END), 0);
+
+				// On demande de poser une carte au joueur
+				send(clients_connected[i], ASK_FOR_PLAY, sizeof(ASK_FOR_PLAY), 0);
+
+				// Le joueur nous envoi l'index de la carte qu'il souhaite jouer
+				recv(clients_connected[i], buffer, sizeof(buffer), 0);
+				bool ok = putCardOnTable(players[i].playerCards[atoi(buffer)], i);
+
+				if(ok) {
+					send(clients_connected[i], RECEIVED, sizeof(RECEIVED), 0);
+				}
 			}
 
-			// On demande à chaque joueur de poser une carte
-
+			// Une fois que tout le monde à joué on fini le round
+			endRound();
 			// On regarde si un joueur à gagné ...
 
 			// On clear le buffer
 			bzero(buffer, sizeof(buffer));
-
-			for(int i = 0; i < nb_client_connected; i++) {
-
-				send(clients_connected[i], ask_player, sizeof(ask_player), 0);
-				recv(clients_connected[i], buffer, 1024, 0);
-				printf("[%s] : %s\n", players[i].name, buffer);
-
-				// Diffussion à tout les joueurs des messages écrits
-				for(int y = 0; y < nb_client_connected; y++) {
-					send(clients_connected[y], buffer, sizeof(buffer), 0);
-				}
-
-				// On clear le buffer pour le prochain joueur
-				bzero(buffer, sizeof(buffer));
-			}
 		}
 		bzero(buffer, sizeof(buffer));
 	}
