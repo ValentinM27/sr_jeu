@@ -28,7 +28,7 @@ void printPlayerCard()
 		} else {
 			if(currentIndex%3 == 0) printf("\n");
 
-			printf("\t %d : [%d|%d]",
+			printf("%d : [%d|%d] \t",
 					currentIndex,
 					you.playerCards[currentIndex].valeur,
 					you.playerCards[currentIndex].cattleHead);

@@ -236,7 +236,16 @@ int main(void)
 
 			// Une fois que tout le monde à joué on fini le round
 			endRound();
+
 			// On regarde si un joueur à gagné ...
+			bool won = checkIfPlayerWon();
+
+			if(won) {
+				
+			}
+
+			// Affichage des scores
+			printPlayersScore();
 
 			// On clear le buffer
 			bzero(buffer, sizeof(buffer));

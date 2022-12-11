@@ -324,12 +324,15 @@ void endGame()
  */
 void printPlayersScore()
 {
+	printf("\t ---------------------\n");
+	printf("\t --      Scores     --\n");
+	printf("\t ---------------------\n");
+
 	for (int i = 0; i < nbPlayers; i++) {
 		if(players[i].score == 0) {
-			printf("\t \t %s : %d points => Vainqeur ! \n", players[i].name, players[i].score);
+			printf("\t %s : %d points => Vainqeur ! \n", players[i].name, players[i].score);
 		} else {
-			printf("\t \t %s : %d points \n", players[i].name, players[i].score);
+			printf("\t %s : %d points \n", players[i].name, players[i].score);
 		}
 	}
 }
-
