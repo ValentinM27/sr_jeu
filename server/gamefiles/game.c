@@ -12,6 +12,7 @@ int currentRound;
 int currentCardInCards;
 CARD cards[NB_CARD];
 int nbPlayers;
+PLAYER winner;
 
 // Table de jeu
 TABLEROW table[4];
@@ -350,6 +351,8 @@ void printPlayersScore(bool end)
 		}
 	}
 
+	winner = temp[0];
+
 	// Affichage
 	for (int i = 0; i < nbPlayers; i++) {
 		if(i == 0 && end) {
@@ -360,6 +363,31 @@ void printPlayersScore(bool end)
 	}
 }
 
+/**
+ * Permet de déterminer le vainqueur de la partie
+ */
+void setWinner()
+{
+	PLAYER temp[6];
+
+	// Copie du tableau
+	for (int i = 0; i < nbPlayers; i++) {
+		temp[i] = players[i];
+	}
+
+	// Construction du classement dans l'ordre
+	for (int i = 0; i < nbPlayers; i++) {
+		for (int y = 0; y < nbPlayers; y++) {
+			if (temp[i].score < temp[y].score) {
+				PLAYER temp_a = temp[i];
+				temp[i] = temp[y];
+				temp[y] = temp_a;
+			}
+		}
+	}
+
+	winner = temp[0];
+}
 /**
  * Permet de ramasser une ligne et de la mettre dans la main d'un joueur
  */

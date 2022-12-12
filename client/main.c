@@ -259,6 +259,14 @@ int main(int argc, char **argv)
 				printYourScore();
 				send(clientSocket, RECEIVED, sizeof(RECEIVED), 0);
 
+				// Reception du nom du vainqueur
+				recv(clientSocket, buffer, sizeof(buffer), 0);
+				printf("************************************");
+				printf("* Vainqueur de la partie : %s      *", buffer);
+				printf("************************************");
+				send(clientSocket, RECEIVED, sizeof(RECEIVED), 0);
+
+				// Fermeture de la connexion
 				close(clientSocket);
 				exit(0);
 			}

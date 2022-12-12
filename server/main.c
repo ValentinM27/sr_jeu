@@ -259,13 +259,24 @@ int main(int argc, char **argv)
 				}
 			}
 
+
 			// On regarde si un joueur à gagné ...
 			bool won = checkIfPlayerWon();
+
+			if(won)
+				setWinner();
 
 			for (int i = 0; i < nb_client_connected; i++) {
 				if(won || currentRound == 10) {
 					send(clients_connected[i], END_GAME, sizeof(END_GAME), 0);
 					recv(clients_connected[i], buffer, sizeof(buffer), 0);
+
+					// Envoie du nom du vainqueur
+					char winnerToString[12];
+					strcpy(winnerToString, winner.name);
+					send(clients_connected[i], winnerToString, sizeof(winnerToString), 0);
+					recv(clients_connected[i], buffer, sizeof(buffer), 0);
+
 					// On ferme les tubes
 					close(clients_connected[i]);
 				} else {
