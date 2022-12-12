@@ -229,6 +229,38 @@ void printBotScore()
 }
 
 /**
+* Retour l'index de la meilleure ligne à ramasser
+*/
+int findBestLineToDraw()
+{
+	// Correspond à l'index de la meilleure ligne à ramasser
+	int bestCattleHead = -1;
+	int indexBestLine = 0;
+
+	// On parcours chaque ligne et on calculs la valeur des tête de boeufs
+	for(int i = 0; i < 4; i ++) {
+		int tempCattleHead = 0;
+
+		// Somme des têtes de boeufs
+		for(int currentCard = 0; currentCard < table[i].currentLastIndex; currentCard ++) {
+			tempCattleHead += table[i].row[currentCard].cattleHead;
+		}
+
+		if(i == 0) {
+			bestCattleHead = tempCattleHead;
+			indexBestLine = i;
+		} else {
+			if (bestCattleHead > tempCattleHead) {
+				bestCattleHead = tempCattleHead;
+				indexBestLine = i;
+			}
+		}
+	}
+
+	return indexBestLine;
+}
+
+/**
  * Permet au joueur de récupérer une ligne
  */
 void takeLigne(int choice)

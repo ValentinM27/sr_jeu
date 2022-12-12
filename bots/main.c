@@ -7,6 +7,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <stdbool.h>
+#include <time.h>
 
 // Paramètres de connexion
 #define server_PORT 8080
@@ -57,6 +58,9 @@
 /* Permet signifier une bonne reception par le client */
 #define RECEIVED "RECEIVED"
 
+/* Délai d'attentes de réponde des bots */
+#define TIME 1
+
 #define ask_player "C'est votre tour !"
 
 /**
@@ -69,7 +73,7 @@
 int main(int argc, char **argv)
 {
 	// Liste des noms
-	char liste_name[4][12] = {"Pierre", "Mohamed", "Bastien", "Marine"};
+	char liste_name[10][12] = {"Bill Gates", "Mark Zuck", "Dijkstra", "Abdenour", "Bouzouane", "XAE-12", "Eric", "Mimonnet", "Jeff Bezos", "McGregor"};
 
 	// Descripteur du socket et buffer
 	int botSocket, serverStream;
@@ -107,8 +111,10 @@ int main(int argc, char **argv)
 
 		// Demande du nom
 		if(strcmp(buffer, ASK_NAME) == 0) {
-			int randomIndexName = rand() % 4;
+			srand(time(NULL));
+			int randomIndexName = rand() % 10;
 			strcpy(you.name, liste_name[randomIndexName]);
+			sleep(TIME);
 			send(botSocket, you.name, sizeof(you.name), 0);
 			printf("[nom envoyé] \t");
 		}
@@ -188,10 +194,9 @@ int main(int argc, char **argv)
 					// Index de la meilleure carte à jouer
 					int indexOfCard = searchBestCardToPlay();
 
-					printf("%d", indexOfCard);
-
 					char indexOfCardToChar[4];
 					sprintf(indexOfCardToChar, "%d", indexOfCard);
+					sleep(TIME);
 					send(botSocket, indexOfCardToChar, sizeof(indexOfCardToChar), 0);
 
 					recv(botSocket, buffer, sizeof(buffer), 0);
@@ -199,7 +204,6 @@ int main(int argc, char **argv)
 					if(strcmp(buffer, RECEIVED) == 0) {
 						// On supprime la carte de la main du bot
 						deleteCardFromHand(you.playerCards[indexOfCard]);
-						printf("Hello");
 					}
 				}
 			}
@@ -210,20 +214,14 @@ int main(int argc, char **argv)
 				recv(botSocket, buffer, sizeof(buffer), 0);
 
 				if(strcmp(buffer, DRAW) == 0) {
-					bool ok = false;
-					int choice;
+					printf("\t - Le bot ne peut pas jouer - \n");
 
-					printf("\t - Vous ne pouvez pas jouer - \n");
+					int choice= findBestLineToDraw();
 
-					while(!ok) {
-						printf("Veuillez choisir la ligne à prendre : ");
-						scanf("%d", &choice);
-
-						if (0 <= choice-1  && choice-1 < 4) ok = true;
-					}
 					char choiceToChar[4];
 					sprintf(choiceToChar, "%d", choice-1);
 
+					sleep(TIME);
 					send(botSocket, choiceToChar, sizeof(choiceToChar), 0);
 					recv(botSocket, buffer, sizeof(buffer), 0);
 
@@ -238,12 +236,14 @@ int main(int argc, char **argv)
 		else if (strcmp(buffer, CONTINUE_GAME) == 0) {
 			printf("-- fin du round -- \n");
 			printBotScore();
+
 			send(botSocket, RECEIVED, sizeof(RECEIVED), 0);
 		}
 		// Gestion fin de partie
 		else if (strcmp(buffer, END_GAME) == 0) {
 			printf("\t *** fin de la partie ! *** \n");
 			printBotScore();
+
 			send(botSocket, RECEIVED, sizeof(RECEIVED), 0);
 
 			// Reception du nom du vainqueur
@@ -251,6 +251,7 @@ int main(int argc, char **argv)
 			printf("************************************");
 			printf("* Vainqueur de la partie : %s      *", buffer);
 			printf("************************************");
+
 			send(botSocket, RECEIVED, sizeof(RECEIVED), 0);
 
 			// Fermeture de la connexion

@@ -45,5 +45,6 @@ void calculateScore();
 void printBotScore();
 void takeLigne(int choice);
 void addCard(CARD cardToAdd);
+int findBestLineToDraw();
 
 #endif
