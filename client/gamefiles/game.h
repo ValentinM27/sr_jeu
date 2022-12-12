@@ -39,5 +39,7 @@ void printTable();
 void deleteCardFromHand(CARD cardToDelete);
 bool canPlay();
 bool checkCanPlayThisCard(CARD cardToPlay);
+void takeLigne();
+void addCard(CARD cardToAdd);
 
 #endif

@@ -285,6 +285,8 @@ void endRound()
 	printf("\t -- Fin du tour %d -- \n", currentRound);
 	printTable();
 
+	printPlayersScore();
+
 	// Si un joueur a gagné, on arrête la partie
 	if (checkIfPlayerWon()) {
 		endGame();
@@ -324,12 +326,79 @@ void endGame()
  */
 void printPlayersScore()
 {
+	printf("\t ---------------------\n");
+	printf("\t --      Scores     --\n");
+	printf("\t ---------------------\n");
+
 	for (int i = 0; i < nbPlayers; i++) {
 		if(players[i].score == 0) {
-			printf("\t \t %s : %d points => Vainqeur ! \n", players[i].name, players[i].score);
+			printf("\t %s : %d points => Vainqeur ! \n", players[i].name, players[i].score);
 		} else {
-			printf("\t \t %s : %d points \n", players[i].name, players[i].score);
+			printf("\t %s : %d points \n", players[i].name, players[i].score);
 		}
 	}
 }
 
+/**
+ * Permet de ramasser une ligne et de la mettre dans la main d'un joueur
+ */
+void takeLigne(int choice, int playerIndex)
+{
+	// On récupère la carte la plus petite du joueur
+	int indexOfSmallestCard = -1;
+	int smallestValue = NB_CARD+1;
+	int currentIndex = 0;
+	bool isEnd = false;
+
+	while (!isEnd) {
+		if(players[playerIndex].playerCards[currentIndex].valeur == 0) isEnd=true;
+
+		else {
+			if (players[playerIndex].playerCards[currentIndex].valeur < smallestValue) {
+				smallestValue = players[playerIndex].playerCards[currentIndex].valeur;
+				indexOfSmallestCard = currentIndex;
+			}
+
+			currentIndex++;
+		}
+	}
+
+	// On retire cette carte de la main du joueur
+	CARD tempCard = players[playerIndex].playerCards[indexOfSmallestCard];
+	deleteCardFromPlayersCards(players[playerIndex].playerCards[indexOfSmallestCard], playerIndex);
+
+	// On lui donne les cartes de la ligne choisie
+	for (int i = 0; i <= table[choice].currentLastIndex; i++) {
+		addCard(table[choice].row[i], playerIndex);
+	}
+
+	// On remplace la ligne choisie par la carte du joueur
+	TABLEROW tempRow;
+	tempRow.currentLastIndex = 0;
+	tempRow.row[0] = tempCard;
+
+	// On remplace la ligne de la table
+	table[choice] = tempRow;
+
+
+	printf("\t -- %s à ramassé la ligne %d -- \n", players[playerIndex].name, choice);
+	printTable();
+}
+
+/**
+* Permet d'ajouter une carte à la main du joueur
+*/
+void addCard(CARD cardToAdd, int playerIndex)
+{
+	bool isEnd = false;
+	int currentIndex = 0;
+
+	while (!isEnd) {
+		if(players[playerIndex].playerCards[currentIndex].valeur == 0) {
+			players[playerIndex].playerCards[currentIndex] = cardToAdd;
+			isEnd = true;
+		}
+
+		currentIndex ++;
+	}
+}
