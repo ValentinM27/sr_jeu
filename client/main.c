@@ -73,7 +73,7 @@ int main(int argc, char **argv)
 	/**
 	 * Si l'utilisateur à saisie une ip, on l'utilise
 	 */
-	if (argc > 2) {
+	if (argc == 2) {
 		strcpy(server_IP,argv[1]);
 	}
 
