@@ -7,6 +7,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <stdbool.h>
+#include <time.h>
 
 // Paramètres de connexion
 #define server_PORT 8080
@@ -57,8 +58,13 @@
 /* Permet signifier une bonne reception par le client */
 #define RECEIVED "RECEIVED"
 
+/* Délai d'attentes de réponde des bots */
+#define TIME 1
+
+#define ask_player "C'est votre tour !"
+
 /**
- * @brief Client
+ * @brief bot
  *
  * @param argc
  * @param argv
@@ -66,25 +72,19 @@
  */
 int main(int argc, char **argv)
 {
-	char server_IP[10] = default_server_IP;
-
-	/**
-	 * Si l'utilisateur à saisie une ip, on l'utilise
-	 */
-	if (argc == 2) {
-		strcpy(server_IP,argv[1]);
-	}
+	// Liste des noms
+	char liste_name[10][12] = {"Bill Gates", "Mark Zuck", "Dijkstra", "Abdenour", "Bouzouane", "XAE-12", "Eric", "Mimonnet", "Jeff Bezos", "McGregor"};
 
 	// Descripteur du socket et buffer
-	int clientSocket, serverStream;
+	int botSocket, serverStream;
 	struct sockaddr_in serverAddr;
 	char buffer[1024];
 
-	// Création socket client
-	clientSocket = socket(AF_INET, SOCK_STREAM, 0);
+	// Création socket bot
+	botSocket = socket(AF_INET, SOCK_STREAM, 0);
 
-	if(clientSocket < 0){
-		printf("[NOK] - Erreur client \n");
+	if(botSocket < 0){
+		printf("[NOK] - Erreur bot \n");
 		return -1;
 	}
 
@@ -94,59 +94,60 @@ int main(int argc, char **argv)
 	// Définition des paramètres serveur
 	serverAddr.sin_family = AF_INET;
 	serverAddr.sin_port = htons(server_PORT);
-	serverAddr.sin_addr.s_addr = inet_addr(server_IP);
+	serverAddr.sin_addr.s_addr = inet_addr(default_server_IP);
 
 	// Connexion server
-	serverStream = connect(clientSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
+	serverStream = connect(botSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
 
-	if(serverStream < 0){
+	if(serverStream < 0) {
 		printf("[NOK] - Erreur de connexion au serveur \n");
-		return -1;
 	}
 	printf("[OK] - Connecté au serveur \n");
 
-	// I/O Client/Server
+	// I/O Bot/Server
 	while(1){
-		printf("[Veuillez patienter] \n");
-		recv(clientSocket, buffer, sizeof(buffer), 0);
+		printf("[Attente serveur] \n");
+		recv(botSocket, buffer, sizeof(buffer), 0);
 
-		// Demande de nom
-		if(strcmp(ASK_NAME, buffer) == 0) {
-			printf("Saisisez votre nom : ");
-			scanf("%s", &buffer[0]);
-			strcpy(you.name, buffer);
-			send(clientSocket, buffer, strlen(buffer), 0);
+		// Demande du nom
+		if(strcmp(buffer, ASK_NAME) == 0) {
+			srand(time(NULL));
+			int randomIndexName = rand() % 10;
+			strcpy(you.name, liste_name[randomIndexName]);
+			sleep(TIME);
+			send(botSocket, you.name, sizeof(you.name), 0);
+			printf("[nom envoyé] \t");
 		}
-		// Reception des cartes
+		// Receptions de cartes
 		else if(strcmp(CARD_ARRAY, buffer) == 0) {
-			send(clientSocket, CARD_ARRAY, sizeof(CARD_ARRAY), 0);
+			send(botSocket, CARD_ARRAY, sizeof(CARD_ARRAY), 0);
 
 			bool isEnd = false;
 			int currentIndex = 0;
 
 			while(!isEnd) {
-				recv(clientSocket, buffer, sizeof(buffer), 0);
+				recv(botSocket, buffer, sizeof(buffer), 0);
 
-				if (strcmp(buffer, END_CARD_ARRAY) == 0) {
+				if(strcmp(buffer, END_CARD_ARRAY) == 0) {
 					isEnd = true;
-					printPlayerCard();
+					printBotCard();
 				} else {
-					// Convertiuon en int
+					// Convertion en int
 					int valeur = atoi(buffer);
 
 					// On créer la carte
 					you.playerCards[currentIndex] = createCard(valeur);
 					currentIndex ++;
 
-					// Confirme la reception au serveur
-					send(clientSocket, RECEIVED, sizeof(RECEIVED), 0);
+					// Confirmation de la reception au serveur
+					send(botSocket, RECEIVED, sizeof(RECEIVED), 0);
 				}
 			}
 		}
-		// Début de round
+		// Début du round
 		else if(strcmp(buffer, NEW_ROUND) == 0) {
-			send(clientSocket, NEW_ROUND, sizeof(NEW_ROUND), 0);
-			recv(clientSocket, buffer, sizeof(buffer), 0);
+			send(botSocket, NEW_ROUND, sizeof(NEW_ROUND), 0);
+			recv(botSocket, buffer, sizeof(buffer), 0);
 			currentRound = atoi(buffer);
 
 			printf("\t ---------------------- \n");
@@ -154,116 +155,107 @@ int main(int argc, char **argv)
 			printf("\t ---------------------- \n");
 
 			// Affichage des cartes du joueur
-			printPlayerCard();
+			printBotCard();
 		}
 		// Reception de l'état de la table
 		else if(strcmp(buffer, TABLE_CARD_ARRAY) == 0) {
-			send(clientSocket, TABLE_CARD_ARRAY, sizeof(TABLE_CARD_ARRAY), 0);
+			send(botSocket, TABLE_CARD_ARRAY, sizeof(TABLE_CARD_ARRAY), 0);
 
 			// Reception ligne par ligne
 			for (int currentRow = 0; currentRow < 4; currentRow ++) {
-				recv(clientSocket, buffer, sizeof(buffer), 0);
-				send(clientSocket, TABLE_LAST_INDEX_OF_ROW, sizeof(TABLE_LAST_INDEX_OF_ROW), 0);
+				recv(botSocket, buffer, sizeof(buffer), 0);
+				send(botSocket, TABLE_LAST_INDEX_OF_ROW, sizeof(TABLE_LAST_INDEX_OF_ROW), 0);
 
 				// Reception dernier index de la ligne
-				recv(clientSocket, buffer, sizeof(buffer), 0);
+				recv(botSocket, buffer, sizeof(buffer), 0);
 				table[currentRow].currentLastIndex = atoi(buffer);
-				send(clientSocket, RECEIVED, sizeof(RECEIVED), 0);
+				send(botSocket, RECEIVED, sizeof(RECEIVED), 0);
 
 				// Construction de la ligne
 				for(int currentCard = 0; currentCard <= table[currentRow].currentLastIndex; currentCard ++) {
-					recv(clientSocket, buffer, sizeof(buffer), 0);
+					recv(botSocket, buffer, sizeof(buffer), 0);
 					table[currentRow].row[currentCard] = createCard(atoi(buffer));
-					send(clientSocket, RECEIVED, sizeof(RECEIVED), 0);
+					send(botSocket, RECEIVED, sizeof(RECEIVED), 0);
 				}
 			}
 
-			recv(clientSocket, buffer, sizeof(buffer), 0);
+			recv(botSocket, buffer, sizeof(buffer), 0);
 			if(strcmp(buffer, TABLE_CARD_ARRAY_END) == 0)
 				printTable();
 		}
 		// Poser carte
 		else if (strcmp(buffer, ASK_FOR_PLAY) == 0) {
-			// Si le joueur peux poser il le fait
+			// Si le bot peut poser une carte
 			if(canPlay()) {
-				send(clientSocket, CAN_PLAY, sizeof(CAN_PLAY), 0);
-				recv(clientSocket, buffer , sizeof(buffer), 0);
+				send(botSocket, CAN_PLAY, sizeof(CAN_PLAY), 0);
+				recv(botSocket, buffer, sizeof(buffer), 0);
 
 				if(strcmp(buffer, RECEIVED) == 0) {
-					int indexOfCard;
-					bool ok = false;
-
-					while (!ok) {
-						printf("Quelle carte voulez-vous poser ? ");
-						scanf("%d", &indexOfCard);
-
-						ok = checkCanPlayThisCard(you.playerCards[indexOfCard]);
-					}
+					// Index de la meilleure carte à jouer
+					int indexOfCard = searchBestCardToPlay();
 
 					char indexOfCardToChar[4];
 					sprintf(indexOfCardToChar, "%d", indexOfCard);
-					send(clientSocket, indexOfCardToChar, sizeof(indexOfCardToChar), 0);
+					sleep(TIME);
+					send(botSocket, indexOfCardToChar, sizeof(indexOfCardToChar), 0);
 
-					recv(clientSocket, buffer, sizeof(buffer), 0);
+					recv(botSocket, buffer, sizeof(buffer), 0);
 
 					if(strcmp(buffer, RECEIVED) == 0) {
-						// On supprime la carte de la main du joueur
+						// On supprime la carte de la main du bot
 						deleteCardFromHand(you.playerCards[indexOfCard]);
 					}
 				}
 			}
-			// Sinon il prend les carte de la ligne souhaitée
+			// Sinon le bot doit selectionner une ligne à ramasser
 			else {
 				// On signale que l'on peut pas jouer au serveur
-				send(clientSocket, CANT_PLAY, sizeof(CANT_PLAY), 0);
-				recv(clientSocket, buffer, sizeof(buffer), 0);
+				send(botSocket, CANT_PLAY, sizeof(CANT_PLAY), 0);
+				recv(botSocket, buffer, sizeof(buffer), 0);
 
 				if(strcmp(buffer, DRAW) == 0) {
-					bool ok = false;
-					int choice;
+					printf("\t - Le bot ne peut pas jouer - \n");
 
-					printf("\t - Vous ne pouvez pas jouer - \n");
+					int choice= findBestLineToDraw();
 
-					while(!ok) {
-						printf("Veuillez choisir la ligne à prendre : ");
-						scanf("%d", &choice);
-
-						if (0 <= choice-1  && choice-1 < 4) ok = true;
-					}
 					char choiceToChar[4];
 					sprintf(choiceToChar, "%d", choice-1);
 
-					send(clientSocket, choiceToChar, sizeof(choiceToChar), 0);
-					recv(clientSocket, buffer, sizeof(buffer), 0);
+					sleep(TIME);
+					send(botSocket, choiceToChar, sizeof(choiceToChar), 0);
+					recv(botSocket, buffer, sizeof(buffer), 0);
 
 					if(strcmp(buffer, RECEIVED) == 0)
 						takeLigne(choice-1);
 
-					printPlayerCard();
+					printBotCard();
 				}
 			}
 		}
 		// Gestion de la fin du round
 		else if (strcmp(buffer, CONTINUE_GAME) == 0) {
 			printf("-- fin du round -- \n");
-			printYourScore();
-			send(clientSocket, RECEIVED, sizeof(RECEIVED), 0);
+			printBotScore();
+
+			send(botSocket, RECEIVED, sizeof(RECEIVED), 0);
 		}
 		// Gestion fin de partie
 		else if (strcmp(buffer, END_GAME) == 0) {
 			printf("\t *** fin de la partie ! *** \n");
-			printYourScore();
-			send(clientSocket, RECEIVED, sizeof(RECEIVED), 0);
+			printBotScore();
+
+			send(botSocket, RECEIVED, sizeof(RECEIVED), 0);
 
 			// Reception du nom du vainqueur
-			recv(clientSocket, buffer, sizeof(buffer), 0);
+			recv(botSocket, buffer, sizeof(buffer), 0);
 			printf("************************************");
 			printf("* Vainqueur de la partie : %s      *", buffer);
 			printf("************************************");
-			send(clientSocket, RECEIVED, sizeof(RECEIVED), 0);
+
+			send(botSocket, RECEIVED, sizeof(RECEIVED), 0);
 
 			// Fermeture de la connexion
-			close(clientSocket);
+			close(botSocket);
 			exit(0);
 		}
 		// Autres messages
@@ -274,4 +266,3 @@ int main(int argc, char **argv)
 
 	return 0;
 }
-
