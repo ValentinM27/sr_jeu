@@ -6,20 +6,20 @@
 // En-tête
 #include "game.h"
 
-// Définition des fonctions
+// Variable du jeu
 PLAYER you;
 int currentRound;
 TABLEROW table[4];
 
 /**
- * Permet d'affciher les cartes du joueur
+ * Permet d'affciher les cartes du bot
  */
-void printPlayerCard()
+void printBotCard()
 {
 	bool end = false;
 	int currentIndex = 0;
 
-	printf("-- Vos cartes -- \n");
+	printf("-- cartes en mains -- \n");
 
 	while (!end) {
 		if (you.playerCards[currentIndex].valeur == 0) {
@@ -88,6 +88,82 @@ void printTable()
 }
 
 /**
+ * Permet de savoir si le bot peux poser une carte
+ */
+bool canPlay()
+{
+	bool canPlay = false;
+
+	bool isEnd = 0;
+	int currentIndex = 0;
+
+	while(!isEnd) {
+		if(you.playerCards[currentIndex].valeur == 0) isEnd = true;
+
+		else {
+			// On compare la carte à la dernière carte de chaque ligne
+			for (int i = 0; i < 4; i++)
+			{
+				canPlay = table[i].row[table[i].currentLastIndex].valeur < you.playerCards[currentIndex].valeur;
+				currentIndex++;
+
+				// Si le bot peux jouer cette carte, on arrête la recherche
+				isEnd = canPlay;
+
+				if(isEnd) break;
+			}
+		}
+	}
+
+	return canPlay;
+}
+
+/**
+ * Retourne l'index de la meilleure carte à jouer pour le bot
+ *
+ * Le bot essaye de placer la carte avec la plus petite valeur disponible
+ */
+int searchBestCardToPlay()
+{
+	// Correspond à la plus petite carte sur la table
+	CARD smallestCardOfTable = table[0].row[table[0].currentLastIndex];
+
+	// Variables pour parcourir les cartes du bot
+	bool isEnd = false;
+	int currentIndex = 0;
+
+	// Correspond à la meilleure carte que peux jouer le bot
+	int indexOfSmallestCardOfBot = -1;
+	int valeurOfSmallestCardOfBot = NB_CARD + 1;
+
+	// On recherche la plus petite carte sur la table
+	for(int i = 1; i < 4; i++) {
+		if(smallestCardOfTable.valeur > table[i].row[table[i].currentLastIndex].valeur)
+			smallestCardOfTable = table[i].row[table[i].currentLastIndex];
+	}
+
+	// On recherche la carte la plus petite que peux jouer le bot
+	while (!isEnd) {
+		if(you.playerCards[currentIndex].valeur == 0)
+			isEnd = true;
+
+		else {
+			if(valeurOfSmallestCardOfBot > you.playerCards[currentIndex].valeur
+				&& smallestCardOfTable.valeur < you.playerCards[currentIndex].valeur
+			) {
+				valeurOfSmallestCardOfBot = you.playerCards[currentIndex].valeur;
+				indexOfSmallestCardOfBot = currentIndex;
+			}
+
+			currentIndex ++;
+		}
+	}
+
+	return indexOfSmallestCardOfBot;
+}
+
+
+/**
  * Permet de supprimer une carte de la main du joueur
  */
 void deleteCardFromHand(CARD cardToDelete)
@@ -120,51 +196,36 @@ void deleteCardFromHand(CARD cardToDelete)
 }
 
 /**
- * Permet de savoir si le joueur peux poser une carte
+ * Permet de calculer le score du bot
  */
-bool canPlay()
+void calculateScore()
 {
-	bool canPlay = false;
+bool endOfHand = false;
+	int currentCard = 0;
 
-	bool isEnd = 0;
-	int currentIndex = 0;
+	// Réinitialisation du score du bot
+	you.score = 0;
 
-	while(!isEnd) {
-		if(you.playerCards[currentIndex].valeur == 0) isEnd = true;
-
-		else {
-			// On compare la carte à la dernière carte de chaque ligne
-			for (int i = 0; i < 4; i++)
-			{
-				canPlay = table[i].row[table[i].currentLastIndex].valeur < you.playerCards[currentIndex].valeur;
-				currentIndex++;
-
-				// Si le joueur peux jouer cette carte, on arrête la recherche
-				isEnd = canPlay;
-
-				if(isEnd) break;
-			}
+	while (!endOfHand) {
+		if (you.playerCards[currentCard].valeur == 0) {
+			endOfHand = true;
+		} else {
+			you.score += you.playerCards[currentCard].cattleHead;
+			currentCard ++;
 		}
 	}
-
-	return canPlay;
 }
 
 /**
- * Permet de vérifier si le joueur peux poser la carte sélectionnée
+ * Permet d'afficher le score du bot
  */
-bool checkCanPlayThisCard(CARD cardToPlay)
+void printBotScore()
 {
-	bool canPlay = false;
+	calculateScore();
 
-	for (int i = 0; i < 4; i++) {
-		canPlay = table[i].row[table[i].currentLastIndex].valeur < cardToPlay.valeur;
-
-		// Si le joueur peux jouer, on quitte la boucle
-		if(canPlay) break;
-	}
-
-	return canPlay;
+	printf("\t ------------------------\n");
+	printf("\t    score : %d points \n", you.score);
+	printf("\t ------------------------\n");
 }
 
 /**
@@ -200,7 +261,7 @@ void takeLigne(int choice)
 }
 
 /**
-* Permet d'ajouter une carte à la main du joueur
+* Permet d'ajouter une carte à la main du bot
 */
 void addCard(CARD cardToAdd)
 {
@@ -215,37 +276,4 @@ void addCard(CARD cardToAdd)
 
 		currentIndex ++;
 	}
-}
-
-/**
- * Permet de calculer le score du joueur
- */
-void calculateScore()
-{
-bool endOfHand = false;
-	int currentCard = 0;
-
-	// Réinitialisation du score du joueur
-	you.score = 0;
-
-	while (!endOfHand) {
-		if (you.playerCards[currentCard].valeur == 0) {
-			endOfHand = true;
-		} else {
-			you.score += you.playerCards[currentCard].cattleHead;
-			currentCard ++;
-		}
-	}
-}
-
-/**
- * Permet d'afficher le score du joueur
- */
-void printYourScore()
-{
-	calculateScore();
-
-	printf("\t ------------------------\n");
-	printf("\t Votre score : %d points \n", you.score);
-	printf("\t ------------------------\n");
 }
