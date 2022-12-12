@@ -255,7 +255,9 @@ void updatePlayerScore()
  */
 bool checkIfPlayerWon()
 {
-	bool won = false;
+	updatePlayerScore();
+
+	bool won = (currentRound == 10);
 
 	for (int i = 0; i < nbPlayers; i++) {
 		if(players[i].score == 0) won = true;
@@ -272,7 +274,10 @@ void startRound()
 	updatePlayerScore();
 	currentRound ++;
 
-	printf("\t -- Début du tour %d -- \n", currentRound);
+	printf("\t ************************ \n");
+	printf("\t *** Début du tour %d *** \n", currentRound);
+	printf("\t ************************ \n");
+
 	printTable();
 }
 
@@ -310,15 +315,12 @@ void beginGame()
  */
 void endGame()
 {
-	printf("\t ---------------------\n");
+	printf("\t *********************\n");
 	printf("\t | Partie terminée ! |\n");
-	printf("\t ---------------------\n");
+	printf("\t *********************\n");
 
 	/* Affichage des scores de tout les joueur */
 	printPlayersScore();
-
-	/* Fermeture du serveur */
-	exit(0);
 }
 
 /**
@@ -379,7 +381,6 @@ void takeLigne(int choice, int playerIndex)
 
 	// On remplace la ligne de la table
 	table[choice] = tempRow;
-
 
 	printf("\t -- %s à ramassé la ligne %d -- \n", players[playerIndex].name, choice);
 	printTable();

@@ -44,6 +44,12 @@
 /* Permet de demander à piocher une carte */
 #define DRAW "[DRAW]"
 
+/* Permet de signifier la fin de la partie */
+#define END_GAME "[END_GAME]"
+
+/* Permet de dire aux joueurs que la partie continue */
+#define CONTINUE_GAME "[CONTINUE_GAME]"
+
 /* Permet signifier une bonne reception par le client */
 #define RECEIVED "RECEIVED"
 
@@ -89,7 +95,6 @@ int main(void)
 	struct sockaddr_in newAddr;
 
 	char buffer[1024];
-	pid_t childpid;
 
 	// Création du scoket
 	serverSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -254,15 +259,27 @@ int main(void)
 				}
 			}
 
-			// Une fois que tout le monde à joué on fini le round
-			endRound();
-
 			// On regarde si un joueur à gagné ...
 			bool won = checkIfPlayerWon();
 
-			if(won) {
-				
+			for (int i = 0; i < nb_client_connected; i++) {
+				if(won || currentRound == 10) {
+					send(clients_connected[i], END_GAME, sizeof(END_GAME), 0);
+					recv(clients_connected[i], buffer, sizeof(buffer), 0);
+					// On ferme les tubes
+					close(clients_connected[i]);
+				} else {
+					send(clients_connected[i], CONTINUE_GAME, sizeof(CONTINUE_GAME), 0);
+					recv(clients_connected[i], buffer, sizeof(buffer), 0);
+				}
 			}
+
+			// Une fois que tout le monde à joué on fini le round
+			endRound();
+
+			if(won)
+				/* Fermeture du serveur */
+				return 0;
 
 			// On clear le buffer
 			bzero(buffer, sizeof(buffer));

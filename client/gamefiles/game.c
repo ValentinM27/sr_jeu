@@ -194,8 +194,6 @@ void takeLigne(int choice)
 	for (int i = 0; i <= table[choice].currentLastIndex; i++) {
 		addCard(table[choice].row[i]);
 	}
-
-	// Pas besoin de gérer la table, le serveur nous la renvoie au début de la manche
 }
 
 /**
@@ -214,4 +212,37 @@ void addCard(CARD cardToAdd)
 
 		currentIndex ++;
 	}
+}
+
+/**
+ * Permet de calculer le score du joueur
+ */
+void calculateScore()
+{
+bool endOfHand = false;
+	int currentCard = 0;
+
+	// Réinitialisation du score du joueur
+	you.score = 0;
+
+	while (!endOfHand) {
+		if (you.playerCards[currentCard].valeur == 0) {
+			endOfHand = true;
+		} else {
+			you.score += you.playerCards[currentCard].cattleHead;
+			currentCard ++;
+		}
+	}
+}
+
+/**
+ * Permet d'afficher le score du joueur
+ */
+void printYourScore()
+{
+	calculateScore();
+
+	printf("\t ------------------------\n");
+	printf("\t Votre score : %d points \n", you.score);
+	printf("\t ------------------------\n");
 }
