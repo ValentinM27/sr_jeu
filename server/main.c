@@ -68,7 +68,7 @@
  *
  * @return int
  */
-int main(void)
+int main(int argc, char **argv)
 {
 	// Descripteur du serveur
 	int serverSocket, inputStream;
