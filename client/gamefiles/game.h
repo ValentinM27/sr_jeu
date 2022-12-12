@@ -41,5 +41,7 @@ bool canPlay();
 bool checkCanPlayThisCard(CARD cardToPlay);
 void takeLigne();
 void addCard(CARD cardToAdd);
+void calculateScore();
+void printYourScore();
 
 #endif

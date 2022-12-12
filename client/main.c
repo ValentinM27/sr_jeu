@@ -48,6 +48,12 @@
 /* Permet de demander à piocher une carte */
 #define DRAW "[DRAW]"
 
+/* Permet de signifier la fin de la partie */
+#define END_GAME "[END_GAME]"
+
+/* Permet de dire aux joueurs que la partie continue */
+#define CONTINUE_GAME "[CONTINUE_GAME]"
+
 /* Permet signifier une bonne reception par le client */
 #define RECEIVED "RECEIVED"
 
@@ -231,6 +237,21 @@ int main(int argc, char **argv)
 						printPlayerCard();
 					}
 				}
+			}
+			// Gestion de la fin du round
+			else if (strcmp(buffer, CONTINUE_GAME) == 0) {
+				printf("-- fin du round -- \n");
+				printYourScore();
+				send(clientSocket, RECEIVED, sizeof(RECEIVED), 0);
+			}
+			// Gestion fin de partie
+			else if (strcmp(buffer, END_GAME) == 0) {
+				printf("\t *** fin de la partie ! *** \n");
+				printYourScore();
+				send(clientSocket, RECEIVED, sizeof(RECEIVED), 0);
+
+				close(clientSocket);
+				exit(0);
 			}
 			// Autres messages
 			else {
