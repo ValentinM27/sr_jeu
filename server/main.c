@@ -57,10 +57,6 @@
 #define server_PORT 8080
 #define server_IP "127.0.0.1"
 
-// Contenu pour le client
-#define ask_player "C'est votre tour !"
-#define game_start "-- Début de la partie --"
-
 /* Déclaration des prototypes des fonctions */
 
 /**
