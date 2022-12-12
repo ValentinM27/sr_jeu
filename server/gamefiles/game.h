@@ -54,7 +54,7 @@ void startRound();
 void endRound();
 void beginGame();
 void endGame();
-void printPlayersScore();
+void printPlayersScore(bool end);
 void takeLigne(int choice, int playerIndex);
 void addCard(CARD cardToAdd, int playerIndex);
 

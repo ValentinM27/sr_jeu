@@ -290,7 +290,7 @@ void endRound()
 	printf("\t -- Fin du tour %d -- \n", currentRound);
 	printTable();
 
-	printPlayersScore();
+	printPlayersScore(false);
 
 	// Si un joueur a gagné, on arrête la partie
 	if (checkIfPlayerWon()) {
@@ -320,23 +320,42 @@ void endGame()
 	printf("\t *********************\n");
 
 	/* Affichage des scores de tout les joueur */
-	printPlayersScore();
+	printPlayersScore(true);
 }
 
 /**
  * Permet d'afficher le score de tout les joueur
  */
-void printPlayersScore()
+void printPlayersScore(bool end)
 {
 	printf("\t ---------------------\n");
 	printf("\t --      Scores     --\n");
 	printf("\t ---------------------\n");
 
+	PLAYER temp[6];
+
+	// Copie du tableau
 	for (int i = 0; i < nbPlayers; i++) {
-		if(players[i].score == 0) {
-			printf("\t %s : %d points => Vainqeur ! \n", players[i].name, players[i].score);
+		temp[i] = players[i];
+	}
+
+	// Construction du classement dans l'ordre
+	for (int i = 0; i < nbPlayers; i++) {
+		for (int y = 0; y < nbPlayers; y++) {
+			if (temp[i].score < temp[y].score) {
+				PLAYER temp_a = temp[i];
+				temp[i] = temp[y];
+				temp[y] = temp_a;
+			}
+		}
+	}
+
+	// Affichage
+	for (int i = 0; i < nbPlayers; i++) {
+		if(i == 0 && end) {
+			printf("\t %d- %s : %d points => Vainqueur !\n", i+1, temp[i].name, temp[i].score);
 		} else {
-			printf("\t %s : %d points \n", players[i].name, players[i].score);
+			printf("\t %d- %s : %d points \n", i+1, temp[i].name, temp[i].score);
 		}
 	}
 }
@@ -382,7 +401,7 @@ void takeLigne(int choice, int playerIndex)
 	// On remplace la ligne de la table
 	table[choice] = tempRow;
 
-	printf("\t -- %s à ramassé la ligne %d -- \n", players[playerIndex].name, choice);
+	printf("\t -- %s à ramassé la ligne %d -- \n", players[playerIndex].name, choice+1);
 	printTable();
 }
 
