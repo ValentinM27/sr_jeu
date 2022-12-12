@@ -32,6 +32,12 @@
 /* Permet de signaler le début du round aux joueurs */
 #define NEW_ROUND "[NEW_ROUND]"
 
+/* Permet à un joueur de dire s'il peut jouer */
+#define CAN_PLAY "[CAN_PLAY]"
+
+/* Permet à un joueur de dire qu'il ne peut pas jouer */
+#define CANT_PLAY "[CANT_PLAY]"
+
 /* Permet de demander à un joueur de poser une carte */
 #define ASK_FOR_PLAY "[ASK_FOR_PLAY]"
 
@@ -224,12 +230,26 @@ int main(void)
 
 				// On demande de poser une carte au joueur
 				send(clients_connected[i], ASK_FOR_PLAY, sizeof(ASK_FOR_PLAY), 0);
-
-				// Le joueur nous envoi l'index de la carte qu'il souhaite jouer
 				recv(clients_connected[i], buffer, sizeof(buffer), 0);
-				bool ok = putCardOnTable(players[i].playerCards[atoi(buffer)], i);
 
-				if(ok) {
+				if(strcmp(buffer, CAN_PLAY) == 0) {
+					send(clients_connected[i], RECEIVED, sizeof(RECEIVED), 0);
+					// Le joueur nous envoi l'index de la carte qu'il souhaite jouer
+					recv(clients_connected[i], buffer, sizeof(buffer), 0);
+					bool ok = putCardOnTable(players[i].playerCards[atoi(buffer)], i);
+
+					if(ok) {
+						send(clients_connected[i], RECEIVED, sizeof(RECEIVED), 0);
+					}
+				} else if (strcmp(buffer, CANT_PLAY) == 0) {
+					// On demande au joueur de choisir la ligne à ramaser
+					send(clients_connected[i], DRAW, sizeof(DRAW), 0);
+					recv(clients_connected[i], buffer, sizeof(buffer), 0);
+
+					// Ramase la ligne en question
+					int choice = atoi(buffer);
+					takeLigne(choice, i);
+
 					send(clients_connected[i], RECEIVED, sizeof(RECEIVED), 0);
 				}
 			}
@@ -243,9 +263,6 @@ int main(void)
 			if(won) {
 				
 			}
-
-			// Affichage des scores
-			printPlayersScore();
 
 			// On clear le buffer
 			bzero(buffer, sizeof(buffer));

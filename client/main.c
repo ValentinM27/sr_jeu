@@ -39,6 +39,12 @@
 /* Permet de demander à un joueur de poser une carte */
 #define ASK_FOR_PLAY "[ASK_FOR_PLAY]"
 
+/* Permet à un joueur de dire s'il peut jouer */
+#define CAN_PLAY "[CAN_PLAY]"
+
+/* Permet à un joueur de dire qu'il ne peut pas jouer */
+#define CANT_PLAY "[CANT_PLAY]"
+
 /* Permet de demander à piocher une carte */
 #define DRAW "[DRAW]"
 
@@ -88,6 +94,7 @@ int main(int argc, char **argv)
 
 	// I/O Client/Server
 	while(1){
+		printf("... \n");
 		// Tant que ce n'est pas son tour, le joueur doit attendre
 		while(strcmp(buffer, ask_player) != 0) {
 			recv(clientSocket, buffer, sizeof(buffer), 0);
@@ -168,30 +175,61 @@ int main(int argc, char **argv)
 			else if (strcmp(buffer, ASK_FOR_PLAY) == 0) {
 				// Si le joueur peux poser il le fait
 				if(canPlay()) {
-					int indexOfCard;
-					bool ok = false;
-
-					while (!ok) {
-						printf("Quelle carte voulez-vous poser ? ");
-						scanf("%d", &indexOfCard);
-
-						ok = checkCanPlayThisCard(you.playerCards[indexOfCard]);
-					}
-
-					char indexOfCardToChar[4];
-					sprintf(indexOfCardToChar, "%d", indexOfCard);
-					send(clientSocket, indexOfCardToChar, sizeof(indexOfCardToChar), 0);
-
-					recv(clientSocket, buffer, sizeof(buffer), 0);
+					send(clientSocket, CAN_PLAY, sizeof(CAN_PLAY), 0);
+					recv(clientSocket, buffer , sizeof(buffer), 0);
 
 					if(strcmp(buffer, RECEIVED) == 0) {
-						// On supprime la carte de la main du joueur
-						deleteCardFromHand(you.playerCards[indexOfCard]);
+						int indexOfCard;
+						bool ok = false;
+
+						while (!ok) {
+							printf("Quelle carte voulez-vous poser ? ");
+							scanf("%d", &indexOfCard);
+
+							ok = checkCanPlayThisCard(you.playerCards[indexOfCard]);
+						}
+
+						char indexOfCardToChar[4];
+						sprintf(indexOfCardToChar, "%d", indexOfCard);
+						send(clientSocket, indexOfCardToChar, sizeof(indexOfCardToChar), 0);
+
+						recv(clientSocket, buffer, sizeof(buffer), 0);
+
+						if(strcmp(buffer, RECEIVED) == 0) {
+							// On supprime la carte de la main du joueur
+							deleteCardFromHand(you.playerCards[indexOfCard]);
+						}
 					}
 				}
 				// Sinon il prend les carte de la ligne souhaitée
 				else {
+					// On signale que l'on peut pas jouer au serveur
+					send(clientSocket, CANT_PLAY, sizeof(CANT_PLAY), 0);
+					recv(clientSocket, buffer, sizeof(buffer), 0);
 
+					if(strcmp(buffer, DRAW) == 0) {
+						bool ok = false;
+						int choice;
+
+						printf("\t - Vous ne pouvez pas jouer - \n");
+
+						while(!ok) {
+							printf("Veuillez choisir la ligne à prendre : ");
+							scanf("%d", &choice);
+
+							if (0 <= choice-1  && choice-1 < 4) ok = true;
+						}
+						char choiceToChar[4];
+						sprintf(choiceToChar, "%d", choice-1);
+
+						send(clientSocket, choiceToChar, sizeof(choiceToChar), 0);
+						recv(clientSocket, buffer, sizeof(buffer), 0);
+
+						if(strcmp(buffer, RECEIVED) == 0)
+							takeLigne(choice-1);
+
+						printPlayerCard();
+					}
 				}
 			}
 			// Autres messages

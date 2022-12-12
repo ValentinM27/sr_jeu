@@ -166,3 +166,52 @@ bool checkCanPlayThisCard(CARD cardToPlay)
 
 	return canPlay;
 }
+
+void takeLigne(int choice)
+{
+	// On récupère la carte la plus petite du joueur
+	int indexOfSmallestCard = -1;
+	int smallestValue = NB_CARD+1;
+	int currentIndex = 0;
+	bool isEnd = false;
+
+	while (!isEnd) {
+		if(you.playerCards[currentIndex].valeur == 0) isEnd=true;
+
+		else {
+			if (you.playerCards[currentIndex].valeur < smallestValue) {
+				smallestValue = you.playerCards[currentIndex].valeur;
+				indexOfSmallestCard = currentIndex;
+			}
+
+			currentIndex++;
+		}
+	}
+
+	deleteCardFromHand(you.playerCards[indexOfSmallestCard]);
+
+	// On lui donne les cartes de la ligne choisie
+	for (int i = 0; i <= table[choice].currentLastIndex; i++) {
+		addCard(table[choice].row[i]);
+	}
+
+	// Pas besoin de gérer la table, le serveur nous la renvoie au début de la manche
+}
+
+/**
+* Permet d'ajouter une carte à la main du joueur
+*/
+void addCard(CARD cardToAdd)
+{
+	bool isEnd = false;
+	int currentIndex = 0;
+
+	while (!isEnd) {
+		if(you.playerCards[currentIndex].valeur == 0) {
+			you.playerCards[currentIndex] = cardToAdd;
+			isEnd = true;
+		}
+
+		currentIndex ++;
+	}
+}
