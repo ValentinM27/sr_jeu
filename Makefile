@@ -5,9 +5,9 @@ build:
 
 # Permet de démarrer le serveur
 server-start:
-	-@./server/bin/server.out
+	-@./server/bin/server.out 
 
 # Permet de lancer un client
 client-start:
-	-@./client/bin/client.out
+	-@./client/bin/client.out $(ip)
 

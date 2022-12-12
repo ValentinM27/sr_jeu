@@ -10,7 +10,7 @@
 
 // Paramètres de connexion
 #define server_PORT 8080
-#define server_IP "127.0.0.1"
+#define default_server_IP "127.0.0.1"
 
 // Import des fichiers du jeu
 #include "gamefiles/game.h"
@@ -68,6 +68,15 @@
  */
 int main(int argc, char **argv)
 {
+	char server_IP[10] = default_server_IP;
+
+	/**
+	 * Si l'utilisateur à saisie une ip, on l'utilise
+	 */
+	if (argc == 2) {
+		strcpy(server_IP,argv[1]);
+	}
+
 	// Descripteur du socket et buffer
 	int clientSocket, serverStream;
 	struct sockaddr_in serverAddr;
@@ -250,6 +259,14 @@ int main(int argc, char **argv)
 				printYourScore();
 				send(clientSocket, RECEIVED, sizeof(RECEIVED), 0);
 
+				// Reception du nom du vainqueur
+				recv(clientSocket, buffer, sizeof(buffer), 0);
+				printf("************************************");
+				printf("* Vainqueur de la partie : %s      *", buffer);
+				printf("************************************");
+				send(clientSocket, RECEIVED, sizeof(RECEIVED), 0);
+
+				// Fermeture de la connexion
 				close(clientSocket);
 				exit(0);
 			}

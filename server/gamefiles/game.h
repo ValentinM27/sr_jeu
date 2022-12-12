@@ -31,6 +31,7 @@ extern int currentRound;
 extern int currentCardInCards;
 extern CARD cards[NB_CARD];
 extern int nbPlayers;
+extern PLAYER winner;
 
 // Table de jeu
 extern TABLEROW table[4];
@@ -54,9 +55,10 @@ void startRound();
 void endRound();
 void beginGame();
 void endGame();
-void printPlayersScore();
+void printPlayersScore(bool end);
 void takeLigne(int choice, int playerIndex);
 void addCard(CARD cardToAdd, int playerIndex);
+void setWinner();
 
 #endif
 
