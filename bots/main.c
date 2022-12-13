@@ -219,7 +219,7 @@ int main(int argc, char **argv)
 					int choice= findBestLineToDraw();
 
 					char choiceToChar[4];
-					sprintf(choiceToChar, "%d", choice-1);
+					sprintf(choiceToChar, "%d", choice);
 
 					sleep(TIME);
 					send(botSocket, choiceToChar, sizeof(choiceToChar), 0);
