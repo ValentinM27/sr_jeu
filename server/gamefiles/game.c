@@ -258,7 +258,7 @@ bool checkIfPlayerWon()
 {
 	updatePlayerScore();
 
-	bool won = (currentRound == 10);
+	bool won = (currentRound == 5);
 
 	for (int i = 0; i < nbPlayers; i++) {
 		if(players[i].score == 0) won = true;

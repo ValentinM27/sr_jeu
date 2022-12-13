@@ -75,11 +75,15 @@ int main(int argc, char **argv)
 	int nb_client_max;
 	int okNbClient = -1;
 
-	while (okNbClient == -1) {
-		printf("Nombre de joueurs (min 2, max 6): ");
-		scanf("%d", &nb_client_max);
+	if(argc == 2) {
+		nb_client_max = atoi(argv[1]);
+	} else {
+		while (okNbClient == -1) {
+			printf("Nombre de joueurs (min 2, max 6): ");
+			scanf("%d", &nb_client_max);
 
-		if(nb_client_max >= 2 && nb_client_max <= 6) okNbClient = 0;
+			if(nb_client_max >= 2 && nb_client_max <= 6) okNbClient = 0;
+		}
 	}
 
 	int clients_connected[nb_client_max];
@@ -114,7 +118,7 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
-	if(listen(serverSocket, 10) == 0){
+	if(listen(serverSocket, 5) == 0){
 		printf("[Server] - En attente de flux \n");
 	} else {
 		printf("[NOK] - Erreur d'eçoute du port \n");
@@ -263,7 +267,7 @@ int main(int argc, char **argv)
 				setWinner();
 
 			for (int i = 0; i < nb_client_connected; i++) {
-				if(won || currentRound == 10) {
+				if(won || currentRound == 5) {
 					send(clients_connected[i], END_GAME, sizeof(END_GAME), 0);
 					recv(clients_connected[i], buffer, sizeof(buffer), 0);
 
